@@ -15,13 +15,17 @@ export default async function DashboardPage() {
   const champions = await getChampions();
   
   const notes = await prisma.matchupNote.findMany({
-    where: { userId: session.user.id },
-    orderBy: { updatedAt: 'desc' }
+    where: { userId: session.user.id, role: "TOP" },
+    orderBy: { updatedAt: 'desc' },
+    take: 13
   });
+
+  const hasMore = notes.length > 12;
+  const initialNotes = hasMore ? notes.slice(0, 12) : notes;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <DashboardClient champions={champions} initialNotes={notes} />
+      <DashboardClient champions={champions} initialNotes={initialNotes} initialHasMore={hasMore} />
     </div>
   );
 }

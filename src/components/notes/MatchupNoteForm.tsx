@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { ArrowLeft, Save, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import dynamic from 'next/dynamic';
+import { Spinner } from "@/components/ui/Spinner";
 import { RoleFilter } from "@/components/dashboard/RoleFilter";
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false });
@@ -146,9 +147,17 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
             {mode === "create" ? "Create Matchup Note" : "Edit Matchup Note"}
           </h1>
         </div>
-        <Button onClick={handleSave} disabled={isSaving || collisionId !== null} className="flex items-center gap-2 px-6">
-          <Save className="w-4 h-4" />
-          {isSaving ? "Saving..." : mode === "create" ? "Save Note" : "Update Note"}
+        <Button onClick={handleSave} disabled={isSaving || collisionId !== null} className="flex items-center gap-2 px-6 min-w-[140px] justify-center">
+          {isSaving ? (
+            <>
+              <Spinner size="sm" className="mr-1" /> Saving...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4" />
+              {mode === "create" ? "Save Note" : "Update Note"}
+            </>
+          )}
         </Button>
       </div>
 

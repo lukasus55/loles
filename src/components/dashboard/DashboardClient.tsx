@@ -7,13 +7,16 @@ import { NotebookPen, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { NoteCard, MatchupNoteDTO } from "./NoteCard";
+import { Spinner } from "@/components/ui/Spinner";
+import { useEffect, useRef } from "react";
 
 interface DashboardClientProps {
   champions: ChampionData[];
   initialNotes: MatchupNoteDTO[];
+  initialHasMore: boolean;
 }
 
-export const DashboardClient: React.FC<DashboardClientProps> = ({ champions, initialNotes }) => {
+export const DashboardClient: React.FC<DashboardClientProps> = ({ champions, initialNotes, initialHasMore }) => {
   const [role, setRole] = useState<Role>("TOP");
   const [filters, setFilters] = useState<MatchupFilters>({
     myPick: null,
@@ -22,23 +25,69 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ champions, ini
     enemySupp: null,
   });
 
+  const [notes, setNotes] = useState<MatchupNoteDTO[]>(initialNotes);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const isFirstRender = useRef(true);
+
   const handleRoleChange = (newRole: Role) => {
-    if (role === newRole) return;
     setRole(newRole);
-    // Reset champion filters when switching roles
     setFilters({ myPick: null, enemyPick: null, mySupp: null, enemySupp: null });
   };
 
-  const filteredNotes = initialNotes.filter((note) => {
-    if (note.role !== role) return false;
-    if (filters.myPick && note.myChampion !== filters.myPick) return false;
-    if (filters.enemyPick && note.enemyChampion !== filters.enemyPick) return false;
-    if (role === "ADC" || role === "SUPP") {
-      if (filters.mySupp && note.mySupport !== filters.mySupp) return false;
-      if (filters.enemySupp && note.enemySupport !== filters.enemySupp) return false;
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
-    return true;
-  });
+
+    const fetchNotes = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch("/api/notes/list", {
+          method: "POST",
+          body: JSON.stringify({ role, ...filters, page: 1 }),
+          headers: { "Content-Type": "application/json" }
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setNotes(data.notes);
+          setHasMore(data.hasMore);
+          setPage(1);
+        }
+      } catch (e) {
+        console.error("Failed to fetch notes", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNotes();
+  }, [role, filters]);
+
+  const handleLoadMore = async () => {
+    setIsLoadingMore(true);
+    const nextPage = page + 1;
+    try {
+      const res = await fetch("/api/notes/list", {
+        method: "POST",
+        body: JSON.stringify({ role, ...filters, page: nextPage }),
+        headers: { "Content-Type": "application/json" }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNotes(prev => [...prev, ...data.notes]);
+        setHasMore(data.hasMore);
+        setPage(nextPage);
+      }
+    } catch (e) {
+      console.error("Failed to load more notes", e);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   return (
     <div className="animate-in fade-in duration-500">
@@ -70,8 +119,14 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ champions, ini
           />
         </div>
 
-        <div className="p-6">
-          {filteredNotes.length === 0 ? (
+        <div className="p-6 relative min-h-[300px]">
+          {isLoading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-neutral-900/40 backdrop-blur-[2px] z-10 rounded-b-xl">
+              <Spinner size="lg" />
+            </div>
+          ) : null}
+
+          {notes.length === 0 && !isLoading ? (
             <div className="flex flex-col items-center justify-center text-center py-20">
               <div className="w-20 h-20 bg-neutral-950 border border-neutral-800 rounded-full flex items-center justify-center mb-6 shadow-inner">
                 <span className="text-3xl opacity-50"><NotebookPen /></span>
@@ -85,11 +140,32 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ champions, ini
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in">
-              {filteredNotes.map((note) => (
-                <NoteCard key={note.id} note={note} champions={champions} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in">
+                {notes.map((note) => (
+                  <NoteCard key={note.id} note={note} champions={champions} />
+                ))}
+              </div>
+              
+              {hasMore && (
+                <div className="mt-10 flex justify-center pb-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleLoadMore} 
+                    disabled={isLoadingMore}
+                    className="px-8 border-neutral-800 bg-neutral-950 hover:bg-neutral-900 hover:text-white"
+                  >
+                    {isLoadingMore ? (
+                      <span className="flex items-center gap-2">
+                        <Spinner size="sm" /> Loading...
+                      </span>
+                    ) : (
+                      "Load More Notes"
+                    )}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
