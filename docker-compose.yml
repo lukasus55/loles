@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: loles-db
+    restart: always
+    environment:
+      POSTGRES_USER: loles
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: loles
+    ports:
+      - "5434:5432"
+    volumes:
+      - loles_pgdata:/var/lib/postgresql/data
+
+volumes:
+  loles_pgdata:
