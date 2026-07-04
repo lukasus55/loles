@@ -5,11 +5,12 @@ import { Role } from "@/components/dashboard/RoleFilter";
 import { ChampionFilterBlock, MatchupFilters } from "@/components/dashboard/ChampionFilterBlock";
 import { ChampionData } from "@/lib/riot/ddragon";
 import { Button } from "@/components/ui/Button";
-import { ArrowLeft, Save, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Save, AlertTriangle, Trash2 } from "lucide-react";
 import Link from "next/link";
 import dynamic from 'next/dynamic';
 import { Spinner } from "@/components/ui/Spinner";
 import { RoleFilter } from "@/components/dashboard/RoleFilter";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false });
 
@@ -44,6 +45,8 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
   const [notes, setNotes] = useState<string>(initialData?.notes || "");
   const [collisionId, setCollisionId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [error, setError] = useState("");
 
   const handleRoleChange = (newRole: Role) => {
@@ -136,6 +139,32 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
     }
   };
 
+  const handleDeleteClick = () => {
+    setIsConfirmOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!initialData?.id) return;
+    
+    setIsDeleting(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/notes/${initialData.id}`, { method: "DELETE" });
+      if (res.ok) {
+        router.push("/dashboard");
+        router.refresh();
+      } else {
+        const data = await res.json();
+        setError(data.message || "Failed to delete note");
+        setIsDeleting(false);
+      }
+    } catch (e) {
+      setError("An unexpected error occurred while deleting.");
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex items-center justify-between">
@@ -147,18 +176,35 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
             {mode === "create" ? "Create Matchup Note" : "Edit Matchup Note"}
           </h1>
         </div>
-        <Button onClick={handleSave} disabled={isSaving || collisionId !== null} className="flex items-center gap-2 px-6 min-w-[140px] justify-center">
-          {isSaving ? (
-            <>
-              <Spinner size="sm" className="mr-1" /> Saving...
-            </>
-          ) : (
-            <>
-              <Save className="w-4 h-4" />
-              {mode === "create" ? "Save Note" : "Update Note"}
-            </>
+        <div className="flex items-center gap-4">
+          {mode === "edit" && (
+            <Button 
+              onClick={handleDeleteClick} 
+              disabled={isDeleting || isSaving} 
+              variant="outline"
+              className="flex items-center gap-2 border-red-900/50 text-red-500 hover:bg-red-950/40 hover:text-red-400 px-4"
+            >
+              {isDeleting ? (
+                <Spinner size="sm" className="mr-1" />
+              ) : (
+                <Trash2 className="w-4 h-4" />
+              )}
+              <span className="hidden sm:inline">Delete Note</span>
+            </Button>
           )}
-        </Button>
+          <Button onClick={handleSave} disabled={isSaving || collisionId !== null || isDeleting} className="flex items-center gap-2 px-6 min-w-[140px] justify-center">
+            {isSaving ? (
+              <>
+                <Spinner size="sm" className="mr-1" /> Saving...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                {mode === "create" ? "Save Note" : "Update Note"}
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {collisionId && mode === "create" && (
@@ -257,6 +303,17 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
           </div>
         </div>
       </div>
+
+      <ConfirmDialog 
+        isOpen={isConfirmOpen}
+        title="Delete Matchup Note"
+        description="Are you sure you want to delete this note? All data and strategies written for this specific matchup will be permanently erased. This action cannot be undone."
+        confirmText="Delete Note"
+        cancelText="Keep Note"
+        isDestructive={true}
+        onConfirm={executeDelete}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
     </div>
   );
 };
