@@ -6,17 +6,15 @@ import { ChampionFilterBlock, MatchupFilters } from "./ChampionFilterBlock";
 import { NotebookPen, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
-import { NoteCard, MatchupNoteDTO } from "./NoteCard";
+import { NoteCard, MatchupNoteDTO, NoteCardSkeleton } from "./NoteCard";
 import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useRef } from "react";
 
 interface DashboardClientProps {
   champions: ChampionData[];
-  initialNotes: MatchupNoteDTO[];
-  initialHasMore: boolean;
 }
 
-export const DashboardClient: React.FC<DashboardClientProps> = ({ champions, initialNotes, initialHasMore }) => {
+export const DashboardClient: React.FC<DashboardClientProps> = ({ champions }) => {
   const [role, setRole] = useState<Role>("TOP");
   const [filters, setFilters] = useState<MatchupFilters>({
     myPick: null,
@@ -25,12 +23,11 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ champions, ini
     enemySupp: null,
   });
 
-  const [notes, setNotes] = useState<MatchupNoteDTO[]>(initialNotes);
-  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [notes, setNotes] = useState<MatchupNoteDTO[]>([]);
+  const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const isFirstRender = useRef(true);
 
   const handleRoleChange = (newRole: Role) => {
     setRole(newRole);
@@ -38,10 +35,6 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ champions, ini
   };
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
 
     const fetchNotes = async () => {
       setIsLoading(true);
@@ -121,12 +114,12 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ champions, ini
 
         <div className="p-6 relative min-h-[300px]">
           {isLoading ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-neutral-900/40 backdrop-blur-[2px] z-10 rounded-b-xl">
-              <Spinner size="lg" />
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <NoteCardSkeleton key={i} />
+              ))}
             </div>
-          ) : null}
-
-          {notes.length === 0 && !isLoading ? (
+          ) : notes.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center py-20">
               <div className="w-20 h-20 bg-neutral-950 border border-neutral-800 rounded-full flex items-center justify-center mb-6 shadow-inner">
                 <span className="text-3xl opacity-50"><NotebookPen /></span>

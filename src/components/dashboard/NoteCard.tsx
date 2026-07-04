@@ -76,3 +76,32 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, champions }) => {
     </Link>
   );
 };
+
+export const NoteCardSkeleton: React.FC = () => {
+  return (
+    <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 h-full flex flex-col animate-pulse min-h-[220px]">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-800 rounded-lg"></div>
+          <div className="w-6 h-3 bg-neutral-800 rounded"></div>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-neutral-800 rounded-lg"></div>
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          <div className="w-10 h-4 bg-neutral-800 rounded"></div>
+          <div className="w-14 h-4 bg-neutral-800 rounded"></div>
+        </div>
+      </div>
+      
+      <div className="flex-1 bg-neutral-950 rounded-lg p-3 border border-neutral-800/50 space-y-2.5">
+        <div className="w-full h-3 bg-neutral-800 rounded"></div>
+        <div className="w-11/12 h-3 bg-neutral-800 rounded"></div>
+        <div className="w-4/5 h-3 bg-neutral-800 rounded"></div>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between">
+        <div className="w-20 h-3 bg-neutral-800 rounded"></div>
+        <div className="w-16 h-3 bg-neutral-800 rounded"></div>
+      </div>
+    </div>
+  );
+};
