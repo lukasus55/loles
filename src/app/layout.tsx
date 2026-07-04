@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Cinzel } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -7,15 +7,10 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
-const cinzel = Cinzel({
-  variable: "--font-cinzel",
-  subsets: ["latin"],
-});
-
 import { Navbar } from "@/components/layout/Navbar";
 
 export const metadata: Metadata = {
-  title: "MatchNotes - League of Legends",
+  title: "LOLES - League of Legends",
   description: "Your personal League of Legends matchup notes.",
 };
 
@@ -27,7 +22,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${outfit.variable} ${cinzel.variable} h-full antialiased`}
+      className={`${outfit.variable} h-full antialiased`}
     >
       <body className={`${outfit.className} min-h-full flex flex-col bg-black text-white`}>
         <Navbar />
