@@ -20,13 +20,13 @@ export const fetchRiotAccount = async (gameName: string, tagLine: string, region
     `https://${continent}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`,
     { headers: { "X-Riot-Token": RIOT_API_KEY! } }
   );
-  
+
   if (!res.ok) {
     if (res.status === 404) throw new Error("Summoner not found. Please check the spelling of your Game Name and Tagline.");
     if (res.status === 403) throw new Error("Invalid Riot API Key. Check your environment variables.");
     throw new Error(`Riot Account API Error: ${res.status}`);
   }
-  
+
   return res.json(); // { puuid, gameName, tagLine }
 };
 
@@ -35,13 +35,13 @@ export const fetchSummonerByPuuid = async (puuid: string, region: string) => {
     `https://${region.toLowerCase()}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}`,
     { headers: { "X-Riot-Token": RIOT_API_KEY! } }
   );
-  
+
   if (!res.ok) {
     if (res.status === 404) throw new Error("Summoner profile not found in this region.");
     if (res.status === 403) throw new Error("Invalid Riot API Key.");
     throw new Error(`Riot Summoner API Error: ${res.status}`);
   }
-  
+
   return res.json(); // { profileIconId, summonerLevel, id, ... }
 };
 
@@ -62,5 +62,18 @@ export const fetchMatchDetails = async (matchId: string, region: string) => {
     { headers: { "X-Riot-Token": RIOT_API_KEY! } }
   );
   if (!res.ok) throw new Error(`Riot Match Details API Error: ${res.status}`);
+  return res.json();
+};
+
+export const fetchLeagueEntries = async (summonerId: string, region: string) => {
+  const res = await fetch(
+    `https://${region.toLowerCase()}.api.riotgames.com/lol/league/v4/entries/by-summoner/${encodeURIComponent(summonerId)}`,
+    { headers: { "X-Riot-Token": RIOT_API_KEY! } }
+  );
+  if (!res.ok) {
+    if (res.status === 404 || res.status === 403) return []; // No rank or Forbidden
+    const errorText = await res.text().catch(() => "No response body");
+    throw new Error(`Riot League API Error: ${res.status} - ${errorText}`);
+  }
   return res.json();
 };

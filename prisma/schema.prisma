@@ -88,6 +88,10 @@ model RiotAccount {
   tagLine       String
   region        String
   profileIconId Int
+  summonerId    String?  @unique
+  tier          String?
+  rank          String?
+  leaguePoints  Int?
   lastSyncedAt  DateTime?
   
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -116,6 +120,9 @@ model Match {
   deaths        Int
   assists       Int
   cs            Int
+  goldEarned    Int?
+  totalDamageDealtToChampions Int?
+  visionScore   Int?
   
   // Lane Opponent Performance (Simplified for now, can be populated if needed)
   enemyChampionName String?

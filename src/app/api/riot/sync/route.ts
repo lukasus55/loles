@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { fetchMatchIds, fetchMatchDetails } from "@/lib/riot/api";
+import { fetchMatchIds, fetchMatchDetails, fetchSummonerByPuuid, fetchLeagueEntries } from "@/lib/riot/api";
 
 const SYNC_COOLDOWN_MS = 2 * 60 * 1000; // 2 minutes
 
@@ -52,11 +52,29 @@ export async function POST() {
     const newMatchIds = matchIds.filter((id: string) => !existingMatchIds.has(id));
 
     if (newMatchIds.length === 0) {
-      // Update last synced
-      await prisma.riotAccount.update({
-        where: { id: riotAccount.id },
-        data: { lastSyncedAt: new Date() }
-      });
+      // Check rank even if no new matches
+      try {
+        const summonerData = await fetchSummonerByPuuid(riotAccount.puuid, riotAccount.region);
+        const leagueData = await fetchLeagueEntries(summonerData.id, riotAccount.region);
+        const soloQ = leagueData.find((q: any) => q.queueType === "RANKED_SOLO_5x5");
+        
+        await prisma.riotAccount.update({
+          where: { id: riotAccount.id },
+          data: { 
+            summonerId: summonerData.id,
+            tier: soloQ?.tier || null,
+            rank: soloQ?.rank || null,
+            leaguePoints: soloQ?.leaguePoints || null,
+            lastSyncedAt: new Date() 
+          }
+        });
+      } catch (e) {
+        console.error("Rank sync error:", e);
+        await prisma.riotAccount.update({
+          where: { id: riotAccount.id },
+          data: { lastSyncedAt: new Date() }
+        });
+      }
       return NextResponse.json({ message: "Already up to date", syncedCount: 0 });
     }
 
@@ -123,6 +141,9 @@ export async function POST() {
             deaths: p.deaths,
             assists: p.assists,
             cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
+            goldEarned: p.goldEarned || null,
+            totalDamageDealtToChampions: p.totalDamageDealtToChampions || null,
+            visionScore: p.visionScore || null,
             enemyChampionName,
             partnerChampionName,
             enemyPartnerChampionName
@@ -136,12 +157,37 @@ export async function POST() {
       }
     }
 
-    await prisma.riotAccount.update({
-      where: { id: riotAccount.id },
-      data: { lastSyncedAt: new Date() }
+    // After syncing new matches, also update rank
+    try {
+      const summonerData = await fetchSummonerByPuuid(riotAccount.puuid, riotAccount.region);
+      const leagueData = await fetchLeagueEntries(summonerData.id, riotAccount.region);
+      const soloQ = leagueData.find((q: any) => q.queueType === "RANKED_SOLO_5x5");
+      
+      await prisma.riotAccount.update({
+        where: { id: riotAccount.id },
+        data: { 
+          summonerId: summonerData.id,
+          tier: soloQ?.tier || null,
+          rank: soloQ?.rank || null,
+          leaguePoints: soloQ?.leaguePoints || null,
+          lastSyncedAt: new Date() 
+        }
+      });
+    } catch (e) {
+      console.error("Rank sync error:", e);
+      await prisma.riotAccount.update({
+        where: { id: riotAccount.id },
+        data: { lastSyncedAt: new Date() }
+      });
+    }
+
+    const updatedMatches = await prisma.match.findMany({
+      where: { userId: session.user.id },
+      orderBy: { gameCreation: "desc" },
+      take: 20
     });
 
-    return NextResponse.json({ success: true, syncedCount });
+    return NextResponse.json({ success: true, syncedCount, matches: updatedMatches });
   } catch (error: any) {
     console.error("Sync API Error:", error);
     return NextResponse.json({ message: "Failed to sync matches" }, { status: 500 });

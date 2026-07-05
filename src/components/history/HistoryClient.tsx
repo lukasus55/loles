@@ -71,8 +71,8 @@ export const HistoryClient = ({ initialMatches, riotAccount, champions, existing
       const res = await fetch("/api/riot/sync", { method: "POST" });
       const data = await res.json();
       if (res.ok) {
-        if (data.count > 0) {
-          toast({ type: "success", title: "Sync Complete", message: `Successfully synced ${data.count} new matches!` });
+        if (data.syncedCount > 0) {
+          toast({ type: "success", title: "Sync Complete", message: `Successfully synced ${data.syncedCount} new matches!` });
           setPage(1);
           setMatches(data.matches || initialMatches);
           setHasMore((data.matches || initialMatches).length === 20);
