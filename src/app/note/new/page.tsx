@@ -19,6 +19,7 @@ export default async function NewNotePage({ searchParams }: { searchParams: Prom
       <MatchupNoteForm 
         mode="create" 
         champions={champions} 
+        from={typeof resolvedParams.from === 'string' ? resolvedParams.from : undefined}
         initialFilters={{
           role: typeof resolvedParams.role === 'string' ? resolvedParams.role as any : undefined,
           myPick: typeof resolvedParams.myPick === 'string' ? resolvedParams.myPick : null,

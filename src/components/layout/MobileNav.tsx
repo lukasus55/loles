@@ -24,14 +24,14 @@ export const MobileNav = () => {
   }, [isOpen]);
 
   const navLinks = [
-    { name: "Dashboard", href: "/dashboard" },
+    { name: "Notes", href: "/notes" },
     { name: "Match History", href: "/history" },
     { name: "Stats", href: "/stats" },
   ];
 
   return (
     <div className="md:hidden ml-2 flex items-center">
-      <button 
+      <button
         onClick={() => setIsOpen(true)}
         className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer"
         aria-label="Open menu"
@@ -45,7 +45,7 @@ export const MobileNav = () => {
             <span className="text-2xl font-bold text-white tracking-tight ml-2">
               LOL<span className="text-red-500">ES</span>
             </span>
-            <button 
+            <button
               onClick={() => setIsOpen(false)}
               className="p-2 text-neutral-400 hover:text-white transition-colors cursor-pointer"
               aria-label="Close menu"
@@ -53,12 +53,12 @@ export const MobileNav = () => {
               <X className="w-6 h-6" />
             </button>
           </div>
-          
+
           <nav className="flex flex-col p-8 space-y-8 mt-4">
             {navLinks.map((link) => (
-              <Link 
+              <Link
                 key={link.href}
-                href={link.href} 
+                href={link.href}
                 className="text-3xl font-bold text-neutral-300 hover:text-white transition-colors"
               >
                 {link.name}

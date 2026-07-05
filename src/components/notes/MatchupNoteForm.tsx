@@ -1,15 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Role } from "@/components/dashboard/RoleFilter";
-import { ChampionFilterBlock, MatchupFilters } from "@/components/dashboard/ChampionFilterBlock";
+import { Role } from "@/components/notes/RoleFilter";
+import { ChampionFilterBlock, MatchupFilters } from "@/components/notes/ChampionFilterBlock";
 import { ChampionData } from "@/lib/riot/ddragon";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeft, Save, AlertTriangle, Trash2 } from "lucide-react";
 import Link from "next/link";
 import dynamic from 'next/dynamic';
 import { Spinner } from "@/components/ui/Spinner";
-import { RoleFilter } from "@/components/dashboard/RoleFilter";
+import { RoleFilter } from "@/components/notes/RoleFilter";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false });
@@ -28,12 +28,14 @@ interface MatchupNoteFormProps {
     notes: string;
   };
   initialFilters?: MatchupFilters & { role?: Role };
+  from?: string;
 }
 
 const PRIO_OPTIONS = ["Yes", "50/50", "No", "N/A"];
 
-export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champions, initialData, initialFilters }) => {
+export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champions, initialData, initialFilters, from }) => {
   const router = useRouter();
+  const backUrl = from === "history" ? "/history" : "/notes";
   const [role, setRole] = useState<Role>(initialData?.role || initialFilters?.role || "TOP");
   const [filters, setFilters] = useState<MatchupFilters>({
     myPick: initialData?.myChampion || initialFilters?.myPick || null,
@@ -112,7 +114,7 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
         });
 
         if (res.ok) {
-          router.push("/dashboard");
+          router.push(backUrl);
           router.refresh();
         } else {
           const data = await res.json();
@@ -126,7 +128,7 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
         });
 
         if (res.ok) {
-          router.push("/dashboard");
+          router.push(backUrl);
           router.refresh();
         } else {
           const data = await res.json();
@@ -153,7 +155,7 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
     try {
       const res = await fetch(`/api/notes/${initialData.id}`, { method: "DELETE" });
       if (res.ok) {
-        router.push("/dashboard");
+        router.push(backUrl);
         router.refresh();
       } else {
         const data = await res.json();
@@ -170,7 +172,7 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="p-2 bg-neutral-900 border border-neutral-800 rounded-lg hover:bg-neutral-800 transition-colors">
+          <Link href={backUrl} className="p-2 bg-neutral-900 border border-neutral-800 rounded-lg hover:bg-neutral-800 transition-colors">
             <ArrowLeft className="w-5 h-5 text-neutral-400" />
           </Link>
           <h1 className="text-3xl font-bold text-white tracking-tight">

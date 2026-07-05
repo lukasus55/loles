@@ -69,7 +69,7 @@ export default function SignupPage() {
         setError("Account created, but couldn't log in automatically.");
         setLoading(false);
       } else if (signInRes?.ok) {
-        window.location.href = "/dashboard";
+        window.location.href = "/notes";
       }
     } catch {
       setError("An unexpected error occurred. Please try again.");
@@ -141,11 +141,11 @@ export default function SignupPage() {
         </div>
 
         <div className="mt-6 space-y-3">
-          <Button variant="outline" fullWidth onClick={() => signIn("discord", { callbackUrl: "/dashboard" })} className="flex items-center justify-center gap-2">
+          <Button variant="outline" fullWidth onClick={() => signIn("discord", { callbackUrl: "/notes" })} className="flex items-center justify-center gap-2">
             <Image src="/discord.svg" alt="Discord" width={20} height={20} />
             Sign up with Discord
           </Button>
-          <Button variant="outline" fullWidth onClick={() => signIn("google", { callbackUrl: "/dashboard" })} className="flex items-center justify-center gap-2">
+          <Button variant="outline" fullWidth onClick={() => signIn("google", { callbackUrl: "/notes" })} className="flex items-center justify-center gap-2">
             <Image src="/google.svg" alt="Google" width={20} height={20} />
             Sign up with Google
           </Button>

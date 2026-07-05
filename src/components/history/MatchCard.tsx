@@ -78,11 +78,12 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, champions, existing
 
   let targetUrl = `/note/new?role=${roleEnum}&myPick=${match.championName}`;
   if (existingNote) {
-    targetUrl = `/note/${existingNote.id}/edit`;
+    targetUrl = `/note/${existingNote.id}/edit?from=history`;
   } else {
     if (match.enemyChampionName) targetUrl += `&enemyPick=${match.enemyChampionName}`;
     if (match.partnerChampionName) targetUrl += `&mySupp=${match.partnerChampionName}`;
     if (match.enemyPartnerChampionName) targetUrl += `&enemySupp=${match.enemyPartnerChampionName}`;
+    targetUrl += `&from=history`;
   }
 
   return (

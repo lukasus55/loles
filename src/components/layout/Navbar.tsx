@@ -20,8 +20,8 @@ export const Navbar = async () => {
         </div>
 
         <nav className="hidden md:flex items-center justify-center space-x-6">
-          <Link href="/dashboard" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">
-            Dashboard
+          <Link href="/notes" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">
+            Notes
           </Link>
           <Link href="/history" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">
             Match History
