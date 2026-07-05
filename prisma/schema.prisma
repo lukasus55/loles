@@ -37,6 +37,8 @@ model User {
   riotAccountId String?   // For later Riot verification
   accounts      Account[]
   matchupNotes  MatchupNote[]
+  riotAccount   RiotAccount?
+  matches       Match[]
 
   @@map("users")
 }
@@ -76,4 +78,54 @@ model MatchupNote {
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("matchup_notes")
+}
+
+model RiotAccount {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  puuid         String   @unique
+  gameName      String
+  tagLine       String
+  region        String
+  profileIconId Int
+  lastSyncedAt  DateTime?
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("riot_accounts")
+}
+
+model Match {
+  id            String   @id @default(cuid())
+  matchId       String   @unique // Riot's internal match ID (e.g. EUW1_12345678)
+  userId        String
+  puuid         String
+  
+  // Game Data
+  season        Int      @default(16)
+  gameCreation  DateTime // When the game started
+  gameDuration  Int      // In seconds
+  queueId       Int      // 420 for Solo, 440 for Flex
+  
+  // Player Performance
+  championId    Int
+  championName  String
+  role          String   // TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY
+  win           Boolean
+  kills         Int
+  deaths        Int
+  assists       Int
+  cs            Int
+  
+  // Lane Opponent Performance (Simplified for now, can be populated if needed)
+  enemyChampionName String?
+  partnerChampionName String?
+  enemyPartnerChampionName String?
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([userId, season])
+  @@index([userId, championName])
+  @@map("matches")
 }

@@ -27,18 +27,19 @@ interface MatchupNoteFormProps {
     prio: string | null;
     notes: string;
   };
+  initialFilters?: MatchupFilters & { role?: Role };
 }
 
 const PRIO_OPTIONS = ["Yes", "50/50", "No", "N/A"];
 
-export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champions, initialData }) => {
+export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champions, initialData, initialFilters }) => {
   const router = useRouter();
-  const [role, setRole] = useState<Role>(initialData?.role || "TOP");
+  const [role, setRole] = useState<Role>(initialData?.role || initialFilters?.role || "TOP");
   const [filters, setFilters] = useState<MatchupFilters>({
-    myPick: initialData?.myChampion || null,
-    enemyPick: initialData?.enemyChampion || null,
-    mySupp: initialData?.mySupport || null,
-    enemySupp: initialData?.enemySupport || null,
+    myPick: initialData?.myChampion || initialFilters?.myPick || null,
+    enemyPick: initialData?.enemyChampion || initialFilters?.enemyPick || null,
+    mySupp: initialData?.mySupport || initialFilters?.mySupp || null,
+    enemySupp: initialData?.enemySupport || initialFilters?.enemySupp || null,
   });
 
   const [prio, setPrio] = useState<string>(initialData?.prio || "N/A");
