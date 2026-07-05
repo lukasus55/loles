@@ -15,7 +15,7 @@ interface RiotAccount {
   profileIconId: number;
 }
 
-export const AccountClient = ({ initialRiotAccount }: { initialRiotAccount: RiotAccount | null }) => {
+export const RiotAccountBox = ({ initialRiotAccount }: { initialRiotAccount: RiotAccount | null }) => {
   const [account, setAccount] = useState<RiotAccount | null>(initialRiotAccount);
   
   const [gameName, setGameName] = useState("");

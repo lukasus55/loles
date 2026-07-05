@@ -2,7 +2,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { AccountClient } from "@/components/account/AccountClient";
+import { RiotAccountBox } from "@/components/account/RiotAccountBox";
+import { ChangePasswordBox } from "@/components/account/ChangePasswordBox";
+import { ChangeNameBox } from "@/components/account/ChangeNameBox";
 
 export default async function AccountPage() {
   const session = await getServerSession(authOptions);
@@ -11,9 +13,14 @@ export default async function AccountPage() {
     redirect("/login");
   }
 
-  const riotAccount = await prisma.riotAccount.findUnique({
-    where: { userId: session.user.id }
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { name: true, passwordHash: true, riotAccount: true }
   });
+
+  const riotAccount = user?.riotAccount || null;
+  const initialName = user?.name || null;
+  const hasPassword = !!user?.passwordHash;
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
@@ -28,7 +35,9 @@ export default async function AccountPage() {
       </div>
 
       <div className="grid gap-8">
-        <AccountClient initialRiotAccount={riotAccount} />
+        <RiotAccountBox initialRiotAccount={riotAccount} />
+        <ChangeNameBox initialName={initialName} />
+        {hasPassword && <ChangePasswordBox />}
       </div>
     </div>
   );
