@@ -5,13 +5,13 @@ import { Spinner } from "@/components/ui/Spinner";
 import { RefreshCw, AlertTriangle, ShieldAlert, Swords } from "lucide-react";
 import { MatchCard } from "./MatchCard";
 import Link from "next/link";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export const HistoryClient = ({ initialMatches, riotAccount, champions, existingNotes = [] }: any) => {
   const [isSyncing, setIsSyncing] = useState(false);
-  const [error, setError] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
   const [mounted, setMounted] = useState(false);
   const [syncCooldown, setSyncCooldown] = useState(0);
+  const { toast } = useToast();
 
   // Pagination state
   const [matches, setMatches] = useState(initialMatches);
@@ -67,27 +67,24 @@ export const HistoryClient = ({ initialMatches, riotAccount, champions, existing
 
   const handleSync = async () => {
     setIsSyncing(true);
-    setError("");
-    setSuccessMsg("");
     try {
       const res = await fetch("/api/riot/sync", { method: "POST" });
       const data = await res.json();
       if (res.ok) {
         if (data.count > 0) {
-          setSuccessMsg(`Successfully synced ${data.count} new matches!`);
+          toast({ type: "success", title: "Sync Complete", message: `Successfully synced ${data.count} new matches!` });
           setPage(1);
           setMatches(data.matches || initialMatches);
           setHasMore((data.matches || initialMatches).length === 20);
         } else {
-          setSuccessMsg("Everything is up to date!");
+          toast({ type: "info", title: "Up to Date", message: "Everything is up to date!" });
         }
         setSyncCooldown(120); // Manually trigger frontend cooldown after successful sync check
-        setTimeout(() => setSuccessMsg(""), 5000);
       } else {
-        setError(data.message || "Failed to sync");
+        toast({ type: "error", title: "Sync Failed", message: data.message || "Failed to sync" });
       }
     } catch (e) {
-      setError("An unexpected error occurred");
+      toast({ type: "error", title: "Error", message: "An unexpected error occurred" });
     } finally {
       setIsSyncing(false);
     }
@@ -141,13 +138,6 @@ export const HistoryClient = ({ initialMatches, riotAccount, champions, existing
           )}
         </div>
       </div>
-
-      {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
-          <p className="text-red-400 text-sm font-medium">{error}</p>
-        </div>
-      )}
 
       {matches.length === 0 ? (
         <div className="text-center py-16 bg-neutral-900/30 border border-neutral-800 rounded-xl">

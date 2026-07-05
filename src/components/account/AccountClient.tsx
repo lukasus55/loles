@@ -5,6 +5,7 @@ import { CheckCircle2, AlertTriangle, Link as LinkIcon } from "lucide-react";
 import Image from "next/image";
 import { AccountInputStep } from "./AccountInputStep";
 import { AccountVerifyStep } from "./AccountVerifyStep";
+import { useToast } from "@/components/ui/ToastProvider";
 
 interface RiotAccount {
   id: string;
@@ -22,18 +23,17 @@ export const AccountClient = ({ initialRiotAccount }: { initialRiotAccount: Riot
   const [region, setRegion] = useState("EUW1");
   
   const [step, setStep] = useState<"INPUT" | "VERIFY">("INPUT");
-  const [targetIconId, setTargetIconId] = useState<number>(1);
+  const [targetIconId, setTargetIconId] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { toast } = useToast();
 
   const handleCheck = async () => {
     if (!gameName || !tagLine) {
-      setError("Please enter both Game Name and Tagline");
+      toast({ type: "warning", title: "Missing Fields", message: "Please enter both Game Name and Tagline" });
       return;
     }
     
     setIsLoading(true);
-    setError("");
     try {
       const res = await fetch("/api/riot/verify", {
         method: "POST",
@@ -43,17 +43,13 @@ export const AccountClient = ({ initialRiotAccount }: { initialRiotAccount: Riot
       
       const data = await res.json();
       if (res.ok) {
-        let nextIcon = Math.floor(Math.random() * 28) + 1;
-        if (nextIcon === data.currentIconId) {
-          nextIcon = nextIcon === 28 ? 1 : nextIcon + 1;
-        }
-        setTargetIconId(nextIcon);
+        setTargetIconId(data.expectedIconId);
         setStep("VERIFY");
       } else {
-        setError(data.message || "Account not found in Riot system");
+        toast({ type: "error", title: "Account Not Found", message: data.message || "Account not found in Riot system" });
       }
     } catch (e) {
-      setError("Failed to connect to server");
+      toast({ type: "error", title: "Connection Error", message: "Failed to connect to server" });
     } finally {
       setIsLoading(false);
     }
@@ -108,13 +104,6 @@ export const AccountClient = ({ initialRiotAccount }: { initialRiotAccount: Riot
       <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
         <LinkIcon className="w-5 h-5 text-red-500" /> Link Riot Account
       </h2>
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-          <p className="text-red-400 text-sm leading-relaxed">{error}</p>
-        </div>
-      )}
 
       {step === "INPUT" && (
         <AccountInputStep

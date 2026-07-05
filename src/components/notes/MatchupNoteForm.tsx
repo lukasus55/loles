@@ -11,6 +11,7 @@ import dynamic from 'next/dynamic';
 import { Spinner } from "@/components/ui/Spinner";
 import { RoleFilter } from "@/components/notes/RoleFilter";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/ui/ToastProvider";
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false });
 
@@ -50,7 +51,7 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [error, setError] = useState("");
+  const { toast } = useToast();
 
   const handleRoleChange = (newRole: Role) => {
     if (mode === "edit") return;
@@ -93,18 +94,13 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
   }, [mode, role, filters]);
 
   const handleSave = async () => {
-    const isBotLane = role === "ADC" || role === "SUPP";
-    const hasRequired = filters.myPick && filters.enemyPick &&
-      (!isBotLane || (filters.mySupp && filters.enemySupp));
-
-    if (!hasRequired) {
-      setError("Please fill out all required champion fields for this matchup.");
+    if (!filters.myPick || !filters.enemyPick || !role) {
+      toast({ type: "warning", title: "Missing Fields", message: "Please fill out all required champion fields for this matchup." });
       return;
     }
 
     setIsSaving(true);
-    setError("");
-
+    
     try {
       if (mode === "create") {
         const res = await fetch("/api/notes", {
@@ -114,11 +110,16 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
         });
 
         if (res.ok) {
+          toast({ type: "success", title: "Note Created", message: "Your matchup note was successfully created!" });
           router.push(backUrl);
           router.refresh();
         } else {
           const data = await res.json();
-          setError(data.message || "Failed to create note");
+          if (res.status === 409) {
+            setCollisionId(data.existingId);
+          } else {
+            toast({ type: "error", title: "Creation Failed", message: data.message || "Failed to create note" });
+          }
         }
       } else {
         const res = await fetch(`/api/notes/${initialData?.id}`, {
@@ -128,15 +129,16 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
         });
 
         if (res.ok) {
+          toast({ type: "success", title: "Note Updated", message: "Your matchup note was successfully updated!" });
           router.push(backUrl);
           router.refresh();
         } else {
           const data = await res.json();
-          setError(data.message || "Failed to update note");
+          toast({ type: "error", title: "Update Failed", message: data.message || "Failed to update note" });
         }
       }
     } catch (e) {
-      setError("An unexpected error occurred.");
+      toast({ type: "error", title: "Error", message: "An unexpected error occurred." });
     } finally {
       setIsSaving(false);
     }
@@ -150,20 +152,20 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
     if (!initialData?.id) return;
     
     setIsDeleting(true);
-    setError("");
 
     try {
       const res = await fetch(`/api/notes/${initialData.id}`, { method: "DELETE" });
       if (res.ok) {
+        toast({ type: "success", title: "Note Deleted", message: "Your matchup note was successfully deleted." });
         router.push(backUrl);
         router.refresh();
       } else {
         const data = await res.json();
-        setError(data.message || "Failed to delete note");
-        setIsDeleting(false);
+        toast({ type: "error", title: "Delete Failed", message: data.message || "Failed to delete note" });
       }
     } catch (e) {
-      setError("An unexpected error occurred while deleting.");
+      toast({ type: "error", title: "Error", message: "An unexpected error occurred while deleting." });
+    } finally {
       setIsDeleting(false);
     }
   };
@@ -226,12 +228,6 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
               Edit Existing Note Instead
             </Button>
           </Link>
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-4 rounded-lg">
-          {error}
         </div>
       )}
 

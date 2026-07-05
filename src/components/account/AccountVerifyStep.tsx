@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { RefreshCw, X, Check } from "lucide-react";
 import Image from "next/image";
+import { useToast } from "@/components/ui/ToastProvider";
 
 interface AccountVerifyStepProps {
   gameName: string;
@@ -25,7 +26,7 @@ export const AccountVerifyStep: React.FC<AccountVerifyStepProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [foundIconId, setFoundIconId] = useState<number | null>(null);
-  const [errorMsg, setErrorMsg] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -36,7 +37,6 @@ export const AccountVerifyStep: React.FC<AccountVerifyStepProps> = ({
   const handleVerify = async () => {
     setIsLoading(true);
     setFoundIconId(null);
-    setErrorMsg("");
 
     try {
       const res = await fetch("/api/riot/verify", {
@@ -47,18 +47,17 @@ export const AccountVerifyStep: React.FC<AccountVerifyStepProps> = ({
 
       const data = await res.json();
       if (res.ok) {
+        toast({ type: "success", title: "Account Verified", message: "Your Riot account has been successfully linked!" });
         onSuccess(data.account);
       } else {
         if (data.foundIconId) {
           setFoundIconId(data.foundIconId);
-          setCooldown(30);
-        } else {
-          setErrorMsg(data.message || "Verification failed");
-          setCooldown(10);
         }
+        toast({ type: "error", title: "Verification Failed", message: data.message || "Verification failed" });
+        setCooldown(30);
       }
     } catch (e) {
-      setErrorMsg("Failed to connect to server");
+      toast({ type: "error", title: "Connection Error", message: "Failed to connect to server" });
       setCooldown(10);
     } finally {
       setIsLoading(false);
@@ -103,8 +102,6 @@ export const AccountVerifyStep: React.FC<AccountVerifyStepProps> = ({
             </div>
           </div>
         )}
-
-        {errorMsg && <p className="text-red-400 text-sm font-medium">{errorMsg}</p>}
 
         <p className="text-neutral-500 text-xs uppercase tracking-widest font-bold">
           Changes may take up to 5 minutes to sync

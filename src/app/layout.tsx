@@ -8,6 +8,7 @@ const outfit = Outfit({
 });
 
 import { Navbar } from "@/components/layout/Navbar";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 
 export const metadata: Metadata = {
   title: "LOLES - League of Legends",
@@ -25,10 +26,12 @@ export default function RootLayout({
       className={`${outfit.variable} h-full antialiased`}
     >
       <body className={`${outfit.className} min-h-full flex flex-col bg-black text-white`}>
-        <Navbar />
-        <main className="flex-1 flex flex-col">
-          {children}
-        </main>
+        <ToastProvider>
+          <Navbar />
+          <main className="flex-1 flex flex-col">
+            {children}
+          </main>
+        </ToastProvider>
       </body>
     </html>
   );
