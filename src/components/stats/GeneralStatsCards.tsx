@@ -2,8 +2,8 @@ import React from "react";
 import { Trophy, Target, Swords, LineChart, Coins, Eye } from "lucide-react";
 
 export const GeneralStatsCards = ({ data }: { data: any }) => {
-  const { 
-    riotAccount, totalMatches, winRate, 
+  const {
+    riotAccount, totalMatches, winRate,
     avgKills, avgDeaths, avgAssists, avgCs,
     avgGold, avgDamage, avgVision
   } = data;
@@ -12,12 +12,6 @@ export const GeneralStatsCards = ({ data }: { data: any }) => {
   const lpString = riotAccount.leaguePoints !== null ? `${riotAccount.leaguePoints} LP` : "";
 
   const stats = [
-    {
-      title: "Current Rank",
-      value: rankString.toLowerCase(), // we will capitalize via css
-      subValue: lpString,
-      icon: <Trophy className="w-5 h-5 text-yellow-500" />
-    },
     {
       title: "Overall Win Rate",
       value: `${winRate.toFixed(1)}%`,
@@ -57,7 +51,7 @@ export const GeneralStatsCards = ({ data }: { data: any }) => {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {stats.map((s, i) => (
         <div key={i} className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-5 shadow-sm hover:border-neutral-700 transition-colors">
           <div className="flex items-center justify-between mb-3">
