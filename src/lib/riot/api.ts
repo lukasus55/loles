@@ -51,7 +51,10 @@ export const fetchMatchIds = async (puuid: string, region: string, count: number
     `https://${continent}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=${count}`,
     { headers: { "X-Riot-Token": RIOT_API_KEY! } }
   );
-  if (!res.ok) throw new Error(`Riot Match IDs API Error: ${res.status}`);
+  if (!res.ok) {
+    const errorText = await res.text().catch(() => "No response body");
+    throw new Error(`Riot Match IDs API Error: ${res.status} - ${errorText}`);
+  }
   return res.json(); // string[]
 };
 

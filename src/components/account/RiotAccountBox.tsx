@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { CheckCircle2, AlertTriangle, Link as LinkIcon } from "lucide-react";
+import { ShieldAlert, Link as LinkIcon, CheckCircle2 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import Image from "next/image";
 import { AccountInputStep } from "./AccountInputStep";
 import { AccountVerifyStep } from "./AccountVerifyStep";
@@ -25,6 +26,7 @@ export const RiotAccountBox = ({ initialRiotAccount }: { initialRiotAccount: Rio
   const [step, setStep] = useState<"INPUT" | "VERIFY">("INPUT");
   const [targetIconId, setTargetIconId] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUnlinkDialogOpen, setIsUnlinkDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const handleCheck = async () => {
@@ -87,14 +89,35 @@ export const RiotAccountBox = ({ initialRiotAccount }: { initialRiotAccount: Rio
         </div>
 
         <div className="mt-6 flex justify-end">
-          <Button variant="outline" className="border-red-900/50 text-red-500 hover:bg-red-950/40 hover:text-red-400" onClick={() => {
-            if(window.confirm("Are you sure you want to unlink your Riot Account? This will not delete your saved notes, but will prevent syncing new matches.")) {
-               alert("Unlink feature coming soon");
-            }
-          }}>
+          <Button variant="outline" className="border-red-900/50 text-red-500 hover:bg-red-950/40 hover:text-red-400" onClick={() => setIsUnlinkDialogOpen(true)}>
             Unlink Account
           </Button>
         </div>
+
+        <ConfirmDialog
+          isOpen={isUnlinkDialogOpen}
+          title="Unlink Riot Account"
+          description="Are you sure you want to unlink your Riot Account? This will not delete your saved notes, but will prevent syncing new matches."
+          confirmText="Unlink"
+          cancelText="Cancel"
+          isDestructive={true}
+          onConfirm={async () => {
+             setIsUnlinkDialogOpen(false);
+             try {
+               const res = await fetch("/api/account/riot/unlink", { method: "POST" });
+               if (res.ok) {
+                 setAccount(null);
+                 setStep("INPUT");
+                 toast({ type: "success", title: "Unlinked", message: "Account unlinked successfully" });
+               } else {
+                 toast({ type: "error", title: "Error", message: "Failed to unlink account" });
+               }
+             } catch(e) {
+               toast({ type: "error", title: "Error", message: "Failed to connect to server" });
+             }
+          }}
+          onCancel={() => setIsUnlinkDialogOpen(false)}
+        />
       </div>
     );
   }

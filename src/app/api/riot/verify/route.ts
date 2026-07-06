@@ -19,9 +19,16 @@ export async function POST(req: Request) {
     if (action === "CHECK") {
       const accountData = await fetchRiotAccount(gameName, tagLine, region);
       const summonerData = await fetchSummonerByPuuid(accountData.puuid, region);
+      
+      let targetIconId = Math.floor(Math.random() * 28) + 1;
+      if (targetIconId === summonerData.profileIconId) {
+         targetIconId = (targetIconId % 28) + 1;
+      }
+      
       return NextResponse.json({ 
         puuid: accountData.puuid,
         currentIconId: summonerData.profileIconId,
+        expectedIconId: targetIconId
       });
     }
 
