@@ -100,7 +100,7 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
     }
 
     setIsSaving(true);
-    
+
     try {
       if (mode === "create") {
         const res = await fetch("/api/notes", {
@@ -150,7 +150,7 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
 
   const executeDelete = async () => {
     if (!initialData?.id) return;
-    
+
     setIsDeleting(true);
 
     try {
@@ -183,9 +183,9 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
         </div>
         <div className="flex items-center gap-4">
           {mode === "edit" && (
-            <Button 
-              onClick={handleDeleteClick} 
-              disabled={isDeleting || isSaving} 
+            <Button
+              onClick={handleDeleteClick}
+              disabled={isDeleting || isSaving}
               variant="outline"
               className="flex items-center gap-2 border-red-900/50 text-red-500 hover:bg-red-950/40 hover:text-red-400 px-4"
             >
@@ -281,8 +281,8 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
                   key={option}
                   onClick={() => setPrio(option)}
                   className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 border text-left cursor-pointer ${prio === option
-                      ? "bg-red-950/40 border-red-900 text-white shadow-[0_0_10px_rgba(239,68,68,0.1)]"
-                      : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                    ? "bg-red-950/40 border-red-900 text-white shadow-[0_0_10px_rgba(239,68,68,0.1)]"
+                    : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white"
                     }`}
                 >
                   {option}
@@ -291,19 +291,11 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
             </div>
           </div>
 
-          <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-5 shadow-sm">
-            <h3 className="text-md font-bold text-white mb-2">Match History</h3>
-            <div className="p-4 bg-neutral-950 border border-neutral-800 rounded-lg text-center mt-4">
-              <span className="text-xl opacity-50 mb-2 block">⚔️</span>
-              <p className="text-xs text-neutral-500">
-                Riot API automated match fetching for specific matchups is coming in Phase 4.
-              </p>
-            </div>
-          </div>
+
         </div>
       </div>
 
-      <ConfirmDialog 
+      <ConfirmDialog
         isOpen={isConfirmOpen}
         title="Delete Matchup Note"
         description="Are you sure you want to delete this note? All data and strategies written for this specific matchup will be permanently erased. This action cannot be undone."
