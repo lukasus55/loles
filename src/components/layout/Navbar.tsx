@@ -12,10 +12,10 @@ export const Navbar = async () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-neutral-800 bg-black/80 backdrop-blur-md">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center space-x-3 flex-1">
-          <Image src="/icon.svg" alt="MatchNotes Icon" width={32} height={32} />
-          <Link href="/" className="text-2xl font-bold text-white tracking-tight">
-            LOL<span className="text-red-500">ES</span>
+        <div className="flex items-center space-x-1 flex-1">
+          <Image src="/icon.svg" alt="MatchNotes Icon" width={16} height={16} />
+          <Link href="/" className="flex h-full items-center pb-1 text-xl font-bold text-white tracking-tight">
+            LOLES
           </Link>
         </div>
 
