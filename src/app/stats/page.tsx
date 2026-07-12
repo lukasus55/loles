@@ -17,7 +17,10 @@ export default async function StatsPage() {
   });
 
   const matches = await prisma.match.findMany({
-    where: { userId: session.user.id }
+    where: { 
+      userId: session.user.id,
+      gameDuration: { gte: 240 }
+    }
   });
 
   if (!matches.length) {
