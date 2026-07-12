@@ -7,10 +7,10 @@ export const ChampionPerformanceTable = ({ champions }: { champions: any[] }) =>
   return (
     <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl overflow-hidden shadow-sm">
       <div className="p-6 border-b border-neutral-800 bg-neutral-900/80">
-        <h2 className="text-xl font-bold text-white">Top Champions</h2>
-        <p className="text-sm text-neutral-400 mt-1">Your performance ranked by matches played.</p>
+        <h2 className="text-xl font-bold text-white">Your Champions</h2>
+
       </div>
-      
+
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm text-neutral-400">
           <thead className="text-xs text-neutral-500 uppercase bg-neutral-950/50">

@@ -21,7 +21,7 @@ export default async function HistoryPage() {
   const matches = await prisma.match.findMany({
     where: { userId: session.user.id },
     orderBy: { gameCreation: 'desc' },
-    take: 10
+    take: 20
   });
 
   const existingNotes = await prisma.matchupNote.findMany({
