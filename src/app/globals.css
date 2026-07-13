@@ -24,3 +24,48 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* --- Custom Markdown Editor Styling --- */
+[data-color-mode="dark"] .w-md-editor {
+  background-color: #0f1014 !important;
+  border: 1px solid #232328 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: none !important;
+}
+
+[data-color-mode="dark"] .w-md-editor-toolbar {
+  background-color: #151518 !important;
+  border-bottom: 1px solid #232328 !important;
+  border-radius: 0.75rem 0.75rem 0 0 !important;
+  padding: 8px 12px !important;
+}
+
+[data-color-mode="dark"] .w-md-editor-toolbar li button {
+  color: #a3a3a3 !important; /* neutral-400 */
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-color-mode="dark"] .w-md-editor-toolbar li button:hover {
+  background-color: #262626 !important; /* neutral-800 */
+  color: #ffffff !important;
+}
+
+[data-color-mode="dark"] .w-md-editor-toolbar li.active button {
+  background-color: #7f1d1d !important; /* red-900 */
+  color: #ffffff !important;
+}
+
+[data-color-mode="dark"] .w-md-editor-toolbar-divider {
+  background-color: #232328 !important;
+}
+
+[data-color-mode="dark"] .w-md-editor-content {
+  background-color: #0f1014 !important;
+}
+
+[data-color-mode="dark"] .w-md-editor-text-pre > code,
+[data-color-mode="dark"] .w-md-editor-text-input {
+  color: #d4d4d8 !important;
+}
+

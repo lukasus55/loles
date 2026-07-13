@@ -26,12 +26,28 @@ export default async function EditNotePage({ params, searchParams }: { params: P
 
   const champions = await getChampions();
 
+  let whereClause: any = {
+    userId: session.user.id,
+    championName: note.myChampion,
+    enemyChampionName: note.enemyChampion,
+    gameDuration: { gte: 240 }
+  };
+  
+  if (note.role === "ADC" || note.role === "SUPP") {
+    if (note.mySupport) whereClause.partnerChampionName = note.mySupport;
+    if (note.enemySupport) whereClause.enemyPartnerChampionName = note.enemySupport;
+  }
+
+  const matches = await prisma.match.findMany({ where: whereClause, select: { win: true } });
+  const dynamicWins = matches.filter(m => m.win).length;
+  const dynamicLosses = matches.filter(m => !m.win).length;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <MatchupNoteForm 
         mode="edit" 
         champions={champions} 
-        initialData={{ ...note, notes: note.notes || "" }} 
+        initialData={{ ...note, notes: note.notes || "", wins: dynamicWins, losses: dynamicLosses }} 
         from={typeof resolvedSearch.from === 'string' ? resolvedSearch.from : undefined}
       />
     </div>

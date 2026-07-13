@@ -12,8 +12,9 @@ import { Spinner } from "@/components/ui/Spinner";
 import { RoleFilter } from "@/components/notes/RoleFilter";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/ToastProvider";
+import { MatchupRecordBox } from "@/components/notes/editor/MatchupRecordBox";
+import { MatchupStrategyEditor } from "@/components/notes/editor/MatchupStrategyEditor";
 
-const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false });
 
 interface MatchupNoteFormProps {
   mode: "create" | "edit";
@@ -27,6 +28,8 @@ interface MatchupNoteFormProps {
     enemySupport: string | null;
     prio: string | null;
     notes: string;
+    wins?: number;
+    losses?: number;
   };
   initialFilters?: MatchupFilters & { role?: Role };
   from?: string;
@@ -256,23 +259,13 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <div className="lg:col-span-3 space-y-4">
-          <h3 className="text-lg font-bold text-white flex items-center tracking-tight">
-            <span className="w-1.5 h-5 bg-red-600 rounded-full mr-3"></span>
-            Matchup Strategy
-          </h3>
-          <div data-color-mode="dark" className="rounded-xl overflow-hidden border border-neutral-800">
-            <MDEditor
-              value={notes}
-              onChange={(val) => setNotes(val || "")}
-              height={500}
-              preview="edit"
-              className="!bg-neutral-950 !border-0"
-            />
-          </div>
-        </div>
+        <MatchupStrategyEditor notes={notes} onChange={setNotes} />
 
         <div className="space-y-6">
+          {mode === "edit" && initialData && (
+            <MatchupRecordBox wins={initialData.wins || 0} losses={initialData.losses || 0} />
+          )}
+
           <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-5 shadow-sm">
             <h3 className="text-md font-bold text-white mb-4">Lane Priority</h3>
             <div className="flex flex-col space-y-2">

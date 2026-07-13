@@ -79,7 +79,7 @@ export const FeatureGrid = () => {
 
       <FeatureRow
         title="Automatic Syncing"
-        description="Link your Riot Account once to securely sync all your matches instantly."
+        description="Link your Riot Account once to sync all your matches instantly."
         badgeText="Riot Integration"
         imageSrc="/screenshots/syncing.webp"
       />
