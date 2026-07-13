@@ -12,8 +12,11 @@ import { ToastProvider } from "@/components/ui/ToastProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "LOLES - League of Legends",
-  description: "Your personal League of Legends matchup notes.",
+  title: {
+    template: '%s - LOLES',
+    default: 'LOLES',
+  },
+  description: 'Your personal League of Legends matchup notes.',
 };
 
 export default function RootLayout({

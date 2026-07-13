@@ -4,12 +4,17 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { HistoryClient } from "@/components/history/HistoryClient";
 import { getChampions } from "@/lib/riot/ddragon";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Match History',
+};
 
 export const dynamic = "force-dynamic";
 
 export default async function HistoryPage() {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user) {
     redirect("/login");
   }

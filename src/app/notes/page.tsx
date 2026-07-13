@@ -3,6 +3,11 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getChampions } from "@/lib/riot/ddragon";
 import { DashboardClient } from "@/components/notes/DashboardClient";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Notes Dashboard',
+};
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -12,7 +17,7 @@ export default async function DashboardPage() {
   }
 
   const champions = await getChampions();
-  
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <DashboardClient champions={champions} />

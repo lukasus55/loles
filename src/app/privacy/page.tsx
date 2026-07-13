@@ -2,7 +2,7 @@ import React from 'react';
 import { Footer } from "@/components/layout/Footer";
 
 export const metadata = {
-  title: "Privacy Policy - LOLES",
+  title: "Privacy Policy",
 };
 
 export default function PrivacyPage() {

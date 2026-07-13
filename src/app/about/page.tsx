@@ -2,7 +2,7 @@ import React from 'react';
 import { Footer } from "@/components/layout/Footer";
 
 export const metadata = {
-  title: "About - LOLES",
+  title: "About",
 };
 
 export default function AboutPage() {

@@ -5,6 +5,12 @@ import { redirect } from "next/navigation";
 import { StatsClient } from "@/components/stats/StatsClient";
 import prisma from "@/lib/prisma";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Analytics',
+};
+
 export default async function StatsPage() {
   const session = await getServerSession(authOptions);
   
