@@ -6,6 +6,8 @@ import { RiotAccountBox } from "@/components/account/RiotAccountBox";
 import { ChangePasswordBox } from "@/components/account/ChangePasswordBox";
 import { ChangeNameBox } from "@/components/account/ChangeNameBox";
 
+import { DangerZoneBox } from "@/components/account/DangerZoneBox";
+
 export default async function AccountPage() {
   const session = await getServerSession(authOptions);
   
@@ -23,7 +25,7 @@ export default async function AccountPage() {
   const hasPassword = !!user?.passwordHash;
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-4xl">
+    <div className="container mx-auto px-4 py-12 max-w-4xl pb-24">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
           <span className="w-1.5 h-8 bg-red-600 rounded-full shadow-[0_0_12px_rgba(239,68,68,0.6)]"></span>
@@ -38,6 +40,8 @@ export default async function AccountPage() {
         <RiotAccountBox initialRiotAccount={riotAccount} />
         <ChangeNameBox initialName={initialName} />
         {hasPassword && <ChangePasswordBox />}
+        
+        <DangerZoneBox hasPassword={hasPassword} />
       </div>
     </div>
   );
