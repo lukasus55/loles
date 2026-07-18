@@ -33,7 +33,12 @@ export async function POST(req: Request) {
       try {
         // Double check it doesn't already exist to be completely safe
         const existing = await prisma.match.findUnique({
-          where: { matchId }
+          where: { 
+            matchId_userId: {
+              matchId,
+              userId: session.user.id
+            }
+          }
         });
         if (existing) continue;
 

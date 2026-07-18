@@ -85,12 +85,12 @@ model MatchupNote {
 model RiotAccount {
   id            String   @id @default(cuid())
   userId        String   @unique
-  puuid         String   @unique
+  puuid         String   
   gameName      String
   tagLine       String
   region        String
   profileIconId Int
-  summonerId    String?  @unique
+  summonerId    String?  
   tier          String?
   rank          String?
   leaguePoints  Int?
@@ -104,7 +104,7 @@ model RiotAccount {
 
 model Match {
   id            String   @id @default(cuid())
-  matchId       String   @unique // Riot's internal match ID (e.g. EUW1_12345678)
+  matchId       String   // Riot's internal match ID (e.g. EUW1_12345678)
   userId        String
   puuid         String
   
@@ -142,6 +142,7 @@ model Match {
 
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
+  @@unique([matchId, userId])
   @@index([userId])
   @@index([userId, season])
   @@index([userId, championName])
