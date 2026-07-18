@@ -2,6 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
+import { Dropdown } from "@/components/ui/Dropdown";
 
 interface AccountInputStepProps {
   gameName: string;
@@ -66,15 +67,13 @@ export const AccountInputStep: React.FC<AccountInputStepProps> = ({
         </div>
         <div className="space-y-2">
           <label className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Region</label>
-          <select 
+          <Dropdown
+            options={REGIONS}
             value={region}
-            onChange={(e) => setRegion(e.target.value)}
-            className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 transition-shadow appearance-none"
-          >
-            {REGIONS.map(r => (
-              <option key={r.value} value={r.value}>{r.label}</option>
-            ))}
-          </select>
+            onChange={setRegion}
+            className="w-full py-3"
+            wrapperClassName="block w-full"
+          />
         </div>
       </div>
 

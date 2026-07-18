@@ -77,7 +77,7 @@ export const AccountVerifyStep: React.FC<AccountVerifyStepProps> = ({
             <div className="text-center">
               <p className="text-red-400 font-bold mb-3 text-sm flex items-center justify-center gap-1"><X className="w-4 h-4" /> Found Icon</p>
               <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-neutral-800 relative mx-auto opacity-75 grayscale hover:grayscale-0 transition-all">
-                <Image src={`https://ddragon.leagueoflegends.com/cdn/14.13.1/img/profileicon/${foundIconId}.png`} alt="Found Icon" fill className="object-cover" />
+                <Image src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${foundIconId}.jpg`} alt="Found Icon" fill className="object-cover" />
               </div>
             </div>
 
@@ -86,7 +86,7 @@ export const AccountVerifyStep: React.FC<AccountVerifyStepProps> = ({
             <div className="text-center">
               <p className="text-green-500 font-bold mb-3 text-sm flex items-center justify-center gap-1"><Check className="w-4 h-4" /> Expected Icon</p>
               <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-red-600/50 shadow-[0_0_20px_rgba(239,68,68,0.3)] relative mx-auto">
-                <Image src={`https://ddragon.leagueoflegends.com/cdn/14.13.1/img/profileicon/${targetIconId}.png`} alt="Target Icon" fill className="object-cover" />
+                <Image src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${targetIconId}.jpg`} alt="Target Icon" fill className="object-cover" />
               </div>
             </div>
           </div>
@@ -94,7 +94,7 @@ export const AccountVerifyStep: React.FC<AccountVerifyStepProps> = ({
           <div className="py-6 flex justify-center">
             <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-red-600/50 shadow-[0_0_20px_rgba(239,68,68,0.3)] relative">
               <Image
-                src={`https://ddragon.leagueoflegends.com/cdn/14.13.1/img/profileicon/${targetIconId}.png`}
+                src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${targetIconId}.jpg`}
                 alt="Target Icon"
                 fill
                 className="object-cover"

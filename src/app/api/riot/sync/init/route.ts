@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { fetchMatchIds, fetchSummonerByPuuid, fetchLeagueEntries } from "@/lib/riot/api";
+import { fetchMatchIds, fetchSummonerByPuuid, fetchLeagueEntries, fetchRiotAccountByPuuid } from "@/lib/riot/api";
 
 const SYNC_COOLDOWN_MS = 2 * 60 * 1000; // 2 minutes
 
@@ -34,14 +34,21 @@ export async function POST(req: Request) {
 
     // Update rank silently in the background (we won't block on this failing)
     try {
-      const summonerData = await fetchSummonerByPuuid(riotAccount.puuid, riotAccount.region);
-      const leagueData = await fetchLeagueEntries(summonerData.id, riotAccount.region);
+      const [summonerData, riotAccountData] = await Promise.all([
+        fetchSummonerByPuuid(riotAccount.puuid, riotAccount.region).catch(() => null),
+        fetchRiotAccountByPuuid(riotAccount.puuid, riotAccount.region).catch(() => null)
+      ]);
+      
+      const leagueData = summonerData?.id ? await fetchLeagueEntries(summonerData.id, riotAccount.region).catch(() => null) : null;
       const soloQ = leagueData?.find((q: any) => q.queueType === "RANKED_SOLO_5x5");
       
       await prisma.riotAccount.update({
         where: { id: riotAccount.id },
         data: { 
-          summonerId: summonerData.id,
+          ...(summonerData?.id ? { summonerId: summonerData.id } : {}),
+          ...(summonerData?.profileIconId ? { profileIconId: summonerData.profileIconId } : {}),
+          ...(riotAccountData?.gameName ? { gameName: riotAccountData.gameName } : {}),
+          ...(riotAccountData?.tagLine ? { tagLine: riotAccountData.tagLine } : {}),
           tier: soloQ?.tier || null,
           rank: soloQ?.rank || null,
           leaguePoints: soloQ?.leaguePoints || null,

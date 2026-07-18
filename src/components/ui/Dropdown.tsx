@@ -13,9 +13,10 @@ interface DropdownProps {
   placeholder?: string;
   className?: string;
   listClassName?: string;
+  wrapperClassName?: string;
 }
 
-export const Dropdown: React.FC<DropdownProps> = ({ options, value, onChange, placeholder, className = "", listClassName = "" }) => {
+export const Dropdown: React.FC<DropdownProps> = ({ options, value, onChange, placeholder, className = "", listClassName = "", wrapperClassName = "inline-block" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +33,7 @@ export const Dropdown: React.FC<DropdownProps> = ({ options, value, onChange, pl
   const selectedOption = options.find((opt) => opt.value === value);
 
   return (
-    <div className="relative inline-block text-left" ref={containerRef}>
+    <div className={`relative text-left ${wrapperClassName}`} ref={containerRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}

@@ -30,6 +30,8 @@ export const RiotAccountBox = ({ initialRiotAccount }: { initialRiotAccount: Rio
   const [isLoading, setIsLoading] = useState(false);
   const [isVerifyingState, setIsVerifyingState] = useState(false);
   const [isUnlinkDialogOpen, setIsUnlinkDialogOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState(0);
   const { toast } = useToast();
 
   const handleLink = async () => {
@@ -111,7 +113,7 @@ export const RiotAccountBox = ({ initialRiotAccount }: { initialRiotAccount: Rio
 
           <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-neutral-800 shrink-0 relative shadow-xl">
             <Image 
-              src={`https://ddragon.leagueoflegends.com/cdn/14.13.1/img/profileicon/${account.profileIconId}.png`} 
+              src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${account.profileIconId}.jpg`} 
               alt="Profile Icon" 
               fill
               className="object-cover"
@@ -119,9 +121,45 @@ export const RiotAccountBox = ({ initialRiotAccount }: { initialRiotAccount: Rio
           </div>
           
           <div className="space-y-1 flex-1">
-            <h3 className="text-2xl font-bold text-white tracking-tight">
-              {account.gameName} <span className="text-neutral-500 text-lg">#{account.tagLine}</span>
-            </h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-2xl font-bold text-white tracking-tight">
+                {account.gameName} <span className="text-neutral-500 text-lg">#{account.tagLine}</span>
+              </h3>
+              <button
+                onClick={async () => {
+                  if (Date.now() - lastRefresh < 120000) {
+                    const remaining = Math.ceil((120000 - (Date.now() - lastRefresh)) / 1000);
+                    toast({ type: "warning", title: "Cooldown Active", message: `Please wait ${remaining} seconds before refreshing again.` });
+                    return;
+                  }
+                  setIsRefreshing(true);
+                  try {
+                    const res = await fetch("/api/riot/refresh", { method: "POST" });
+                    const data = await res.json();
+                    if (res.ok && data.account) {
+                      setAccount(data.account);
+                      setLastRefresh(Date.now());
+                      toast({ type: "success", title: "Refreshed", message: "Successfully updated profile icon and name!" });
+                    } else {
+                      toast({ type: "error", title: "Refresh Failed", message: data.message });
+                    }
+                  } catch (e) {
+                    toast({ type: "error", title: "Error", message: "Failed to connect to server" });
+                  } finally {
+                    setIsRefreshing(false);
+                  }
+                }}
+                disabled={isRefreshing}
+                className="p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Refresh Profile"
+              >
+                {isRefreshing ? (
+                  <Spinner size="sm" className="w-4 h-4" />
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                )}
+              </button>
+            </div>
             <p className="text-neutral-400 uppercase font-bold tracking-wider text-sm">{account.region}</p>
           </div>
         </div>

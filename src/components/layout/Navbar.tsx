@@ -19,7 +19,7 @@ export const Navbar = async () => {
 
     if (dbUser) {
       if (dbUser.iconPreference === "RIOT" && dbUser.riotAccount?.profileIconId) {
-        resolvedImage = `https://ddragon.leagueoflegends.com/cdn/14.13.1/img/profileicon/${dbUser.riotAccount.profileIconId}.png`;
+        resolvedImage = `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${dbUser.riotAccount.profileIconId}.jpg`;
       } else if (dbUser.iconPreference === "SOCIAL" && dbUser.image) {
         resolvedImage = dbUser.image;
       }

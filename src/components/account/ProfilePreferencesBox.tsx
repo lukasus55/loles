@@ -155,7 +155,7 @@ export const ProfilePreferencesBox = ({
               <div className="w-10 h-10 shrink-0 rounded-full border border-neutral-800 flex items-center justify-center overflow-hidden mr-4 bg-neutral-900 relative shadow-md">
                 {riotAccount ? (
                   <Image 
-                    src={`https://ddragon.leagueoflegends.com/cdn/14.13.1/img/profileicon/${riotAccount.profileIconId}.png`} 
+                    src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${riotAccount.profileIconId}.jpg`} 
                     alt="Riot Icon" 
                     fill 
                   />

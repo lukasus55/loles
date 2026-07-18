@@ -30,6 +30,22 @@ export const fetchRiotAccount = async (gameName: string, tagLine: string, region
   return res.json(); // { puuid, gameName, tagLine }
 };
 
+export const fetchRiotAccountByPuuid = async (puuid: string, region: string) => {
+  const continent = getContinentalRouting(region);
+  const res = await fetch(
+    `https://${continent}.api.riotgames.com/riot/account/v1/accounts/by-puuid/${puuid}`,
+    { headers: { "X-Riot-Token": RIOT_API_KEY! } }
+  );
+
+  if (!res.ok) {
+    if (res.status === 404) throw new Error("Riot account not found.");
+    if (res.status === 403) throw new Error("Invalid Riot API Key.");
+    throw new Error(`Riot Account API Error: ${res.status}`);
+  }
+
+  return res.json(); // { puuid, gameName, tagLine }
+};
+
 export const fetchSummonerByPuuid = async (puuid: string, region: string) => {
   const res = await fetch(
     `https://${region.toLowerCase()}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}`,
