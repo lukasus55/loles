@@ -26,7 +26,7 @@ services:
       - "3055:3000"
     # Wait for the DB to be ready, then push Prisma schema before starting
     command: >
-      sh -c "npx prisma db push && npm start"
+      sh -c "npx prisma db push --accept-data-loss && npm start"
 
 volumes:
   loles_pgdata:
