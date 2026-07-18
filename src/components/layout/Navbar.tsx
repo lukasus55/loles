@@ -3,11 +3,28 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 import { UserNav } from './UserNav';
 import { MobileNav } from './MobileNav';
 
 export const Navbar = async () => {
   const session = await getServerSession(authOptions);
+
+  let resolvedImage = null;
+  if (session?.user?.id) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { image: true, iconPreference: true, riotAccount: { select: { profileIconId: true } } }
+    });
+
+    if (dbUser) {
+      if (dbUser.iconPreference === "RIOT" && dbUser.riotAccount?.profileIconId) {
+        resolvedImage = `https://ddragon.leagueoflegends.com/cdn/14.13.1/img/profileicon/${dbUser.riotAccount.profileIconId}.png`;
+      } else if (dbUser.iconPreference === "SOCIAL" && dbUser.image) {
+        resolvedImage = dbUser.image;
+      }
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-neutral-800 bg-black/80 backdrop-blur-md">
@@ -33,7 +50,7 @@ export const Navbar = async () => {
 
         <div className="flex items-center justify-end space-x-4 flex-1">
           {session?.user ? (
-            <UserNav user={session.user} />
+            <UserNav user={{ ...session.user, image: resolvedImage }} />
           ) : (
             <>
               <Link href="/login" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors hidden sm:block">

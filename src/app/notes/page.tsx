@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { getChampions } from "@/lib/riot/ddragon";
+import prisma from "@/lib/prisma";
 import { DashboardClient } from "@/components/notes/DashboardClient";
 import { Metadata } from "next";
 
@@ -15,12 +15,14 @@ export default async function DashboardPage() {
   if (!session?.user) {
     redirect("/login");
   }
+  const dbUser = await prisma.user.findUnique({ where: { id: session.user.id }, select: { primaryRole: true } });
+  const preferredRole = dbUser?.primaryRole || undefined;
 
   const champions = await getChampions();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <DashboardClient champions={champions} />
+      <DashboardClient champions={champions} preferredRole={preferredRole} />
     </div>
   );
 }

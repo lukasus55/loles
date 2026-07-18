@@ -18,7 +18,7 @@ export default async function AccountPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { name: true, passwordHash: true, riotAccount: true, image: true }
+    select: { name: true, passwordHash: true, riotAccount: true, image: true, primaryRole: true, iconPreference: true }
   });
 
   const riotAccount = user?.riotAccount || null;
@@ -43,7 +43,12 @@ export default async function AccountPage() {
         <div className="flex-1 w-full grid gap-12 min-w-0">
           <section id="profile" className="space-y-12 scroll-mt-24">
             <ChangeNameBox initialName={initialName} />
-            <ProfilePreferencesBox userImage={user?.image || null} riotAccount={riotAccount} />
+            <ProfilePreferencesBox 
+              userImage={user?.image || null} 
+              riotAccount={riotAccount} 
+              initialRole={user?.primaryRole || null}
+              initialIconPreference={user?.iconPreference || "NONE"}
+            />
           </section>
 
           <section id="riot" className="scroll-mt-24">

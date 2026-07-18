@@ -33,9 +33,11 @@ model User {
   email         String?   @unique
   emailVerified DateTime? @map("email_verified")
   image         String?
-  passwordHash  String?
-  riotAccountId String?   // For later Riot verification
-  accounts      Account[]
+  passwordHash   String?
+  riotAccountId  String?   // For later Riot verification
+  primaryRole    Role?
+  iconPreference String    @default("NONE")
+  accounts       Account[]
   matchupNotes  MatchupNote[]
   riotAccount   RiotAccount?
   matches       Match[]

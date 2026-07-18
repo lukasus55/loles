@@ -12,10 +12,11 @@ import { useEffect, useRef } from "react";
 
 interface DashboardClientProps {
   champions: ChampionData[];
+  preferredRole?: Role | null;
 }
 
-export const DashboardClient: React.FC<DashboardClientProps> = ({ champions }) => {
-  const [role, setRole] = useState<Role>("TOP");
+export const DashboardClient: React.FC<DashboardClientProps> = ({ champions, preferredRole }) => {
+  const [role, setRole] = useState<Role>(preferredRole || "TOP");
   const [filters, setFilters] = useState<MatchupFilters>({
     myPick: null,
     enemyPick: null,
@@ -93,7 +94,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ champions }) =
           </h2>
           <div className="flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full md:w-auto">
             <RoleFilter selectedRole={role} onChange={handleRoleChange} />
-            <Link href="/note/new" className="shrink-0">
+            <Link href={`/note/new?role=${role}`} className="shrink-0">
               <Button className="flex items-center gap-2 shadow-sm" size="sm">
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">Add Note</span>
@@ -128,8 +129,8 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ champions }) =
               <p className="text-neutral-400 max-w-sm mb-8">
                 You haven&apos;t added any notes matching these filters yet. Start tracking your matchups!
               </p>
-              <Link href="/note/new">
-                <Button variant="outline" className="px-8">Create your first note</Button>
+              <Link href={`/note/new?role=${role}`}>
+                <Button variant="outline" className="px-8 cursor-pointer">Create your first note</Button>
               </Link>
             </div>
           ) : (
