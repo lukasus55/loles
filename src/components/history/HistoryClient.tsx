@@ -10,6 +10,7 @@ import { LinkAccountPrompt } from "@/components/account/LinkAccountPrompt";
 
 export const HistoryClient = ({ initialMatches, riotAccount, champions, existingNotes = [] }: any) => {
   const [isSyncing, setIsSyncing] = useState(false);
+  const [syncProgress, setSyncProgress] = useState({ current: 0, total: 0 });
   const [mounted, setMounted] = useState(false);
   const [syncCooldown, setSyncCooldown] = useState(0);
   const { toast } = useToast();
@@ -68,26 +69,71 @@ export const HistoryClient = ({ initialMatches, riotAccount, champions, existing
 
   const handleSync = async () => {
     setIsSyncing(true);
+    setSyncProgress({ current: 0, total: 0 });
     try {
-      const res = await fetch("/api/riot/sync", { method: "POST" });
-      const data = await res.json();
-      if (res.ok) {
-        if (data.syncedCount > 0) {
-          toast({ type: "success", title: "Sync Complete", message: `Successfully synced ${data.syncedCount} new matches!` });
-          setPage(1);
-          setMatches(data.matches || initialMatches);
-          setHasMore((data.matches || initialMatches).length === 20);
-        } else {
-          toast({ type: "info", title: "Up to Date", message: "Everything is up to date!" });
+      const initRes = await fetch("/api/riot/sync/init", { method: "POST" });
+      const initData = await initRes.json();
+
+      if (!initRes.ok) {
+        toast({ type: "error", title: "Sync Failed", message: initData.message || "Failed to initialize sync" });
+        setIsSyncing(false);
+        return;
+      }
+
+      const newMatchIds = initData.newMatchIds || [];
+      if (newMatchIds.length === 0) {
+        toast({ type: "info", title: "Up to Date", message: "Everything is up to date!" });
+        setSyncCooldown(120);
+        setIsSyncing(false);
+        return;
+      }
+
+      setSyncProgress({ current: 0, total: newMatchIds.length });
+
+      const chunkSize = 5;
+      let processedTotal = 0;
+
+      for (let i = 0; i < newMatchIds.length; i += chunkSize) {
+        const chunk = newMatchIds.slice(i, i + chunkSize);
+        
+        try {
+          const processRes = await fetch("/api/riot/sync/process", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ matchIds: chunk })
+          });
+          const processData = await processRes.json();
+          if (processRes.ok && processData.processedCount !== undefined) {
+             processedTotal += processData.processedCount;
+          } else {
+             processedTotal += chunk.length;
+          }
+        } catch (e) {
+          processedTotal += chunk.length;
         }
-        setSyncCooldown(120); // Manually trigger frontend cooldown after successful sync check
-      } else {
-        toast({ type: "error", title: "Sync Failed", message: data.message || "Failed to sync" });
+
+        setSyncProgress({ current: Math.min(processedTotal, newMatchIds.length), total: newMatchIds.length });
+
+        if (i + chunkSize < newMatchIds.length) {
+          await new Promise(r => setTimeout(r, 1500));
+        }
+      }
+
+      toast({ type: "success", title: "Sync Complete", message: `Successfully synced ${processedTotal} new matches!` });
+      setSyncCooldown(120);
+      
+      setPage(1);
+      const refreshRes = await fetch(`/api/riot/matches?skip=0&take=20`);
+      if (refreshRes.ok) {
+        const refreshData = await refreshRes.json();
+        setMatches(refreshData.matches || initialMatches);
+        setHasMore((refreshData.matches || initialMatches).length === 20);
       }
     } catch (e) {
       toast({ type: "error", title: "Error", message: "An unexpected error occurred" });
     } finally {
       setIsSyncing(false);
+      setSyncProgress({ current: 0, total: 0 });
     }
   };
 
@@ -117,7 +163,7 @@ export const HistoryClient = ({ initialMatches, riotAccount, champions, existing
               className="px-6 min-w-[140px] flex items-center justify-center transition-colors shadow-sm bg-neutral-900 border border-red-500/50 text-red-500 hover:bg-red-500/10 hover:border-red-500 disabled:opacity-75 disabled:bg-neutral-800 disabled:border-neutral-600 disabled:text-neutral-300 disabled:cursor-not-allowed disabled:hover:bg-neutral-800"
             >
               {isSyncing ? (
-                <><Spinner size="sm" className="mr-2 border-red-500" /> Syncing...</>
+                <><Spinner size="sm" className="mr-2 border-red-500" /> {syncProgress.total > 0 ? `Syncing ${syncProgress.current}/${syncProgress.total}` : "Syncing..."}</>
               ) : syncCooldown > 0 ? (
                 `Wait ${syncCooldown}s`
               ) : (

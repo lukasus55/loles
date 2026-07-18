@@ -2,15 +2,20 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { fetchMatchIds, fetchMatchDetails, fetchSummonerByPuuid, fetchLeagueEntries, fetchMatchTimeline } from "@/lib/riot/api";
+import { fetchMatchDetails, fetchMatchTimeline } from "@/lib/riot/api";
 
-const SYNC_COOLDOWN_MS = 2 * 60 * 1000; // 2 minutes
-
-export async function POST() {
+export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const matchIds: string[] = body.matchIds;
+
+    if (!matchIds || !Array.isArray(matchIds) || matchIds.length === 0) {
+      return NextResponse.json({ message: "No matchIds provided" }, { status: 400 });
     }
 
     const riotAccount = await prisma.riotAccount.findUnique({
@@ -21,68 +26,17 @@ export async function POST() {
       return NextResponse.json({ message: "No Riot account linked" }, { status: 400 });
     }
 
-    // Cooldown check
-    if (riotAccount.lastSyncedAt) {
-      const timeSinceLastSync = Date.now() - riotAccount.lastSyncedAt.getTime();
-      if (timeSinceLastSync < SYNC_COOLDOWN_MS) {
-        const remainingSeconds = Math.ceil((SYNC_COOLDOWN_MS - timeSinceLastSync) / 1000);
-        return NextResponse.json({ 
-          message: `Please wait ${remainingSeconds} seconds before syncing again.` 
-        }, { status: 429 });
-      }
-    }
-
-    // Fetch latest 15 match IDs
-    const matchIds = await fetchMatchIds(riotAccount.puuid, riotAccount.region, 15);
-
-    if (!matchIds || matchIds.length === 0) {
-      return NextResponse.json({ message: "No recent matches found", syncedCount: 0 });
-    }
-
-    // Check which match IDs we already have
-    const existingMatches = await prisma.match.findMany({
-      where: {
-        matchId: { in: matchIds },
-        userId: session.user.id
-      },
-      select: { matchId: true }
-    });
-
-    const existingMatchIds = new Set(existingMatches.map(m => m.matchId));
-    const newMatchIds = matchIds.filter((id: string) => !existingMatchIds.has(id));
-
-    if (newMatchIds.length === 0) {
-      // Check rank even if no new matches
-      try {
-        const summonerData = await fetchSummonerByPuuid(riotAccount.puuid, riotAccount.region);
-        const leagueData = await fetchLeagueEntries(summonerData.id, riotAccount.region);
-        const soloQ = leagueData.find((q: any) => q.queueType === "RANKED_SOLO_5x5");
-        
-        await prisma.riotAccount.update({
-          where: { id: riotAccount.id },
-          data: { 
-            summonerId: summonerData.id,
-            tier: soloQ?.tier || null,
-            rank: soloQ?.rank || null,
-            leaguePoints: soloQ?.leaguePoints || null,
-            lastSyncedAt: new Date() 
-          }
-        });
-      } catch (e) {
-        console.error("Rank sync error:", e);
-        await prisma.riotAccount.update({
-          where: { id: riotAccount.id },
-          data: { lastSyncedAt: new Date() }
-        });
-      }
-      return NextResponse.json({ message: "Already up to date", syncedCount: 0 });
-    }
-
     let syncedCount = 0;
 
-    // Fetch and process new matches sequentially to avoid slamming the Riot API rate limits
-    for (const matchId of newMatchIds) {
+    // Process exactly the matches requested
+    for (const matchId of matchIds) {
       try {
+        // Double check it doesn't already exist to be completely safe
+        const existing = await prisma.match.findUnique({
+          where: { matchId }
+        });
+        if (existing) continue;
+
         const matchData = await fetchMatchDetails(matchId, riotAccount.region);
         
         // Ensure it's a valid match with participants
@@ -91,8 +45,6 @@ export async function POST() {
         const p = matchData.info.participants.find((p: any) => p.puuid === riotAccount.puuid);
         if (!p) continue;
 
-        // Skip non-standard game modes where teamPosition might be empty (like Arena/ARAM) if desired.
-        // Or just save them as "UNKNOWN"
         const role = p.teamPosition || "UNKNOWN";
 
         // Find enemy opponent
@@ -229,43 +181,12 @@ export async function POST() {
         syncedCount++;
       } catch (e) {
         console.error(`Failed to process match ${matchId}:`, e);
-        // Continue to the next match even if one fails
       }
     }
 
-    // After syncing new matches, also update rank
-    try {
-      const summonerData = await fetchSummonerByPuuid(riotAccount.puuid, riotAccount.region);
-      const leagueData = await fetchLeagueEntries(summonerData.id, riotAccount.region);
-      const soloQ = leagueData.find((q: any) => q.queueType === "RANKED_SOLO_5x5");
-      
-      await prisma.riotAccount.update({
-        where: { id: riotAccount.id },
-        data: { 
-          summonerId: summonerData.id,
-          tier: soloQ?.tier || null,
-          rank: soloQ?.rank || null,
-          leaguePoints: soloQ?.leaguePoints || null,
-          lastSyncedAt: new Date() 
-        }
-      });
-    } catch (e) {
-      console.error("Rank sync error:", e);
-      await prisma.riotAccount.update({
-        where: { id: riotAccount.id },
-        data: { lastSyncedAt: new Date() }
-      });
-    }
-
-    const updatedMatches = await prisma.match.findMany({
-      where: { userId: session.user.id },
-      orderBy: { gameCreation: "desc" },
-      take: 20
-    });
-
-    return NextResponse.json({ success: true, syncedCount, matches: updatedMatches });
+    return NextResponse.json({ success: true, processedCount: syncedCount });
   } catch (error: any) {
-    console.error("Sync API Error:", error);
-    return NextResponse.json({ message: "Failed to sync matches" }, { status: 500 });
+    console.error("Sync Process API Error:", error);
+    return NextResponse.json({ message: "Failed to process matches" }, { status: 500 });
   }
 }
