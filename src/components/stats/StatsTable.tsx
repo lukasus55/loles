@@ -99,10 +99,10 @@ export const StatsTable: React.FC<StatsTableProps> = ({ data, championsData, tit
       <div className="p-5 border-b border-neutral-800/50 shrink-0">
         <h3 className="text-xl font-bold text-white tracking-tight">{title}</h3>
       </div>
-      
+
       <div className="overflow-y-auto flex-1 custom-scrollbar">
         <table className="w-full text-sm text-left table-fixed">
-          <thead className="text-[10px] sm:text-xs text-neutral-400 uppercase bg-neutral-950/80 sticky top-0 z-10 border-b border-neutral-800/50 shadow-sm">
+          <thead className="text-[10px] sm:text-xs text-neutral-400 uppercase bg-neutral-950 sticky top-0 z-10 border-b border-neutral-800/50 shadow-sm">
             <tr>
               <th scope="col" className="px-4 py-3 sm:px-6 cursor-pointer group hover:bg-neutral-900/50 transition-colors w-[45%] sm:w-[28%] relative" onClick={() => handleSort("championName")}>
                 <div className="flex items-center gap-2">Champion</div>
@@ -133,25 +133,25 @@ export const StatsTable: React.FC<StatsTableProps> = ({ data, championsData, tit
               if (wr >= 70) wrColor = "text-yellow-500";
               else if (wr >= 60) wrColor = "text-blue-500";
               else if (wr >= 50) wrColor = "text-green-500";
-              
+
               const avgKills = row.played > 0 ? row.kills / row.played : 0;
               const avgDeaths = row.played > 0 ? row.deaths / row.played : 0;
               const avgAssists = row.played > 0 ? row.assists / row.played : 0;
               const kdaRatioValue = avgDeaths > 0 ? ((avgKills + avgAssists) / avgDeaths) : 999;
               const kdaRatio = avgDeaths > 0 ? kdaRatioValue.toFixed(2) : "Perfect";
-              
+
               let kdaColor = "text-neutral-300";
               if (kdaRatioValue >= 5) kdaColor = "text-yellow-500";
               else if (kdaRatioValue >= 4) kdaColor = "text-blue-500";
               else if (kdaRatioValue >= 3) kdaColor = "text-green-500";
-              
+
               const csPerMin = row.gameDuration > 0 ? row.cs / (row.gameDuration / 60) : 0;
 
               const iconSrc = getChampIcon(row.championName);
               const displayChampName = getDisplayChampName(row.championName);
               return (
-                <tr 
-                  key={row.championName} 
+                <tr
+                  key={row.championName}
                   onClick={() => onRowClick?.(row.championName)}
                   className={`bg-transparent hover:bg-neutral-800/30 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
                 >

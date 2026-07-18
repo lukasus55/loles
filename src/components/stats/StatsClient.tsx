@@ -29,7 +29,7 @@ export const StatsClient = ({ matches, champions, riotAccount }: { matches: any[
 
   const isExactMatchup = filters.champions.myPick && filters.champions.enemyPick;
 
-  const filteredMatches = useMemo(() => {
+  const roleFilteredMatches = useMemo(() => {
     return matches.filter(m => {
       if (filters.season && m.season !== filters.season) return false;
       if (filters.role) {
@@ -39,6 +39,14 @@ export const StatsClient = ({ matches, champions, riotAccount }: { matches: any[
       return true;
     });
   }, [matches, filters.season, filters.role]);
+
+  const filteredMatches = useMemo(() => {
+    return roleFilteredMatches.filter(m => {
+      if (filters.champions.mySupp && m.partnerChampionName !== filters.champions.mySupp) return false;
+      if (filters.champions.enemySupp && m.enemyPartnerChampionName !== filters.champions.enemySupp) return false;
+      return true;
+    });
+  }, [roleFilteredMatches, filters.champions.mySupp, filters.champions.enemySupp]);
 
   const { tableData, tableTitle } = useMemo(() => {
     const dataMap: Record<string, StatRowData> = {};
@@ -163,7 +171,7 @@ export const StatsClient = ({ matches, champions, riotAccount }: { matches: any[
 
   const enemyTableData = useMemo(() => {
     const dataMap: Record<string, { championName: string, played: number, wins: number }> = {};
-    matches.forEach(m => {
+    roleFilteredMatches.forEach(m => {
       if (!m.enemyChampionName) return;
       if (!dataMap[m.enemyChampionName]) {
         dataMap[m.enemyChampionName] = { championName: m.enemyChampionName, played: 0, wins: 0 };
@@ -172,7 +180,7 @@ export const StatsClient = ({ matches, champions, riotAccount }: { matches: any[
       if (m.win) dataMap[m.enemyChampionName].wins++;
     });
     return Object.values(dataMap);
-  }, [matches]);
+  }, [roleFilteredMatches]);
 
   return (
     <div className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full animate-in fade-in duration-500 space-y-8">

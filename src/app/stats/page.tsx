@@ -34,6 +34,8 @@ export default async function StatsPage() {
       role: true,
       championName: true,
       enemyChampionName: true,
+      partnerChampionName: true,
+      enemyPartnerChampionName: true,
       win: true,
       kills: true,
       deaths: true,

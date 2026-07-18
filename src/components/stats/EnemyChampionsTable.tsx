@@ -84,10 +84,10 @@ export const EnemyChampionsTable: React.FC<EnemyChampionsTableProps> = ({ data, 
       <div className="p-4 border-b border-neutral-800/50 shrink-0">
         <h3 className="text-lg font-bold text-white tracking-tight">Enemy Champions</h3>
       </div>
-      
+
       <div className="overflow-y-auto flex-1 custom-scrollbar">
         <table className="w-full text-sm text-left table-fixed">
-          <thead className="text-[10px] text-neutral-400 uppercase bg-neutral-950/80 sticky top-0 z-10 border-b border-neutral-800/50 shadow-sm">
+          <thead className="text-[10px] text-neutral-400 uppercase bg-neutral-950 sticky top-0 z-10 border-b border-neutral-800/50 shadow-sm">
             <tr>
               <th scope="col" className="px-4 py-2 cursor-pointer group hover:bg-neutral-900/50 transition-colors w-[50%] relative" onClick={() => handleSort("championName")}>
                 <div className="flex items-center gap-2">Champion</div>
@@ -108,7 +108,7 @@ export const EnemyChampionsTable: React.FC<EnemyChampionsTableProps> = ({ data, 
               const wr = row.played > 0 ? (row.wins / row.played) * 100 : 0;
               const iconSrc = getChampIcon(row.championName);
               const displayChampName = getDisplayChampName(row.championName);
-              
+
               return (
                 <tr key={row.championName} className="bg-transparent hover:bg-neutral-800/30 transition-colors">
                   <td className="px-4 py-2 flex items-center gap-3">
