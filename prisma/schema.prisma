@@ -131,6 +131,14 @@ model Match {
   enemyChampionName String?
   partnerChampionName String?
   enemyPartnerChampionName String?
+  
+  // Early Game Stats (at 15 mins)
+  csAt15        Int?
+  goldAt15      Int?
+  laneKills     Int?
+  enemyCsAt15   Int?
+  enemyGoldAt15 Int?
+  enemyLaneKills Int?
 
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   

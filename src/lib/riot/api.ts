@@ -68,6 +68,16 @@ export const fetchMatchDetails = async (matchId: string, region: string) => {
   return res.json();
 };
 
+export const fetchMatchTimeline = async (matchId: string, region: string) => {
+  const continent = getContinentalRouting(region);
+  const res = await fetch(
+    `https://${continent}.api.riotgames.com/lol/match/v5/matches/${matchId}/timeline`,
+    { headers: { "X-Riot-Token": RIOT_API_KEY! } }
+  );
+  if (!res.ok) throw new Error(`Riot Match Timeline API Error: ${res.status}`);
+  return res.json();
+};
+
 export const fetchLeagueEntries = async (summonerId: string, region: string) => {
   const res = await fetch(
     `https://${region.toLowerCase()}.api.riotgames.com/lol/league/v4/entries/by-summoner/${encodeURIComponent(summonerId)}`,

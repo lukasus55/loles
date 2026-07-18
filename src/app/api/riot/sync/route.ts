@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { fetchMatchIds, fetchMatchDetails, fetchSummonerByPuuid, fetchLeagueEntries } from "@/lib/riot/api";
+import { fetchMatchIds, fetchMatchDetails, fetchSummonerByPuuid, fetchLeagueEntries, fetchMatchTimeline } from "@/lib/riot/api";
 
 const SYNC_COOLDOWN_MS = 2 * 60 * 1000; // 2 minutes
 
@@ -124,6 +124,76 @@ export async function POST() {
           }
         }
 
+        let csAt15 = null;
+        let goldAt15 = null;
+        let laneKills = null;
+        let enemyCsAt15 = null;
+        let enemyGoldAt15 = null;
+        let enemyLaneKills = null;
+
+        if (enemyChampionName && matchData.info.gameDuration >= 15 * 60) {
+          try {
+            const timelineData = await fetchMatchTimeline(matchId, riotAccount.region);
+            if (timelineData?.info?.frames) {
+              const frames = timelineData.info.frames;
+              const frame15 = frames[15];
+              
+              if (frame15?.participantFrames) {
+                const enemy = matchData.info.participants.find(
+                  (ep: any) => ep.teamPosition === role && ep.teamId !== p.teamId
+                );
+                
+                if (enemy) {
+                  const myFrame = frame15.participantFrames[p.participantId.toString()];
+                  const enemyFrame = frame15.participantFrames[enemy.participantId.toString()];
+                  
+                  if (myFrame) {
+                    csAt15 = (myFrame.minionsKilled || 0) + (myFrame.jungleMinionsKilled || 0);
+                    goldAt15 = myFrame.totalGold || 0;
+                  }
+                  if (enemyFrame) {
+                    enemyCsAt15 = (enemyFrame.minionsKilled || 0) + (enemyFrame.jungleMinionsKilled || 0);
+                    enemyGoldAt15 = enemyFrame.totalGold || 0;
+                  }
+
+                  let myKills = 0;
+                  let oppKills = 0;
+
+                  const myTeamIds = [p.participantId];
+                  const enemyTeamIds = [enemy.participantId];
+
+                  if (role === "BOTTOM" || role === "UTILITY") {
+                    const partnerRole = role === "BOTTOM" ? "UTILITY" : "BOTTOM";
+                    const partner = matchData.info.participants.find((ap: any) => ap.teamPosition === partnerRole && ap.teamId === p.teamId);
+                    const enemyPartner = matchData.info.participants.find((ep: any) => ep.teamPosition === partnerRole && ep.teamId !== p.teamId);
+                    if (partner) myTeamIds.push(partner.participantId);
+                    if (enemyPartner) enemyTeamIds.push(enemyPartner.participantId);
+                  }
+
+                  const maxFrames = Math.min(15, frames.length);
+                  for (let i = 0; i < maxFrames; i++) {
+                    const events = frames[i].events || [];
+                    for (const event of events) {
+                      if (event.type === "CHAMPION_KILL") {
+                        if (myTeamIds.includes(event.killerId) && enemyTeamIds.includes(event.victimId)) {
+                          myKills++;
+                        } else if (enemyTeamIds.includes(event.killerId) && myTeamIds.includes(event.victimId)) {
+                          oppKills++;
+                        }
+                      }
+                    }
+                  }
+
+                  laneKills = myKills;
+                  enemyLaneKills = oppKills;
+                }
+              }
+            }
+          } catch (e) {
+             console.error(`Timeline fetch failed for ${matchId}`, e);
+          }
+        }
+
         await prisma.match.create({
           data: {
             matchId,
@@ -146,7 +216,13 @@ export async function POST() {
             visionScore: p.visionScore || null,
             enemyChampionName,
             partnerChampionName,
-            enemyPartnerChampionName
+            enemyPartnerChampionName,
+            csAt15,
+            goldAt15,
+            laneKills,
+            enemyCsAt15,
+            enemyGoldAt15,
+            enemyLaneKills
           }
         });
 

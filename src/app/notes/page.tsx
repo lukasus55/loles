@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getChampions } from "@/lib/riot/ddragon";
 import prisma from "@/lib/prisma";
+import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/notes/DashboardClient";
 import { Metadata } from "next";
 
