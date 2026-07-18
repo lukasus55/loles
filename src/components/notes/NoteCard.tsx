@@ -28,11 +28,21 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, champions }) => {
 
   const isBotLane = note.role === "ADC" || note.role === "SUPP";
 
-  const renderSide = (primaryId: string, suppId: string | null) => (
+  const renderSide = (primaryId: string, suppId: string | null, isMyPick: boolean) => (
     <div className="flex items-center gap-1.5">
-      <img src={getChampIcon(primaryId) || ""} className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border border-neutral-700 shadow-sm" alt="Champ" title={primaryId} />
+      <img 
+        src={getChampIcon(primaryId) || ""} 
+        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg border shadow-sm ${isMyPick ? 'border-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)] ring-2 ring-red-500/20' : 'border-neutral-700'}`} 
+        alt="Champ" 
+        title={primaryId} 
+      />
       {isBotLane && suppId && (
-        <img src={getChampIcon(suppId) || ""} className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg border border-neutral-700 opacity-80" alt="Supp" title={suppId} />
+        <img 
+          src={getChampIcon(suppId) || ""} 
+          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg border opacity-80 ${isMyPick ? 'border-red-500/50 ring-1 ring-red-500/20' : 'border-neutral-700'}`} 
+          alt="Supp" 
+          title={suppId} 
+        />
       )}
     </div>
   );
@@ -42,9 +52,9 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, champions }) => {
       <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 hover:border-red-900/80 transition-all shadow-sm hover:shadow-[0_0_20px_rgba(239,68,68,0.05)] h-full flex flex-col">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3 sm:gap-4">
-            {renderSide(note.myChampion, note.mySupport)}
+            {renderSide(note.myChampion, note.mySupport, true)}
             <span className="text-red-600 font-black italic text-sm opacity-50 px-1">VS</span>
-            {renderSide(note.enemyChampion, note.enemySupport)}
+            {renderSide(note.enemyChampion, note.enemySupport, false)}
           </div>
 
           <div className="flex flex-col items-end">

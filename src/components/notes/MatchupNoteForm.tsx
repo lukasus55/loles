@@ -14,6 +14,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/ToastProvider";
 import { MatchupRecordBox } from "@/components/notes/editor/MatchupRecordBox";
 import { MatchupStrategyEditor } from "@/components/notes/editor/MatchupStrategyEditor";
+import { MatchupHeader } from "@/components/notes/editor/MatchupHeader";
 
 
 interface MatchupNoteFormProps {
@@ -60,6 +61,11 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
     if (mode === "edit") return;
     setRole(newRole);
     setFilters({ myPick: null, enemyPick: null, mySupp: null, enemySupp: null });
+  };
+
+  const getChampIcon = (id: string | null) => {
+    if (!id) return "";
+    return champions.find(c => c.id === id)?.iconUrl || "";
   };
 
   useEffect(() => {
@@ -234,37 +240,37 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
         </div>
       )}
 
-      <div className={`bg-neutral-900/60 border border-neutral-800 rounded-xl p-5 shadow-sm transition-opacity duration-300 ${mode === "edit" ? "opacity-60 pointer-events-none select-none" : ""}`}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 gap-4 border-b border-neutral-800/50 pb-4">
-          <h3 className="text-lg font-bold text-white flex items-center tracking-tight">
-            <span className="w-1.5 h-5 bg-red-600 rounded-full mr-3 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span>
-            Matchup Configuration
-          </h3>
-
-          {mode === "edit" ? (
-            <div className="text-sm text-neutral-400 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" /> Cannot be changed in edit mode.
-            </div>
-          ) : (
-            <RoleFilter selectedRole={role} onChange={handleRoleChange} />
-          )}
-        </div>
-
-        <ChampionFilterBlock
+      {mode === "edit" ? (
+        <MatchupHeader
+          filters={filters}
           role={role}
           champions={champions}
-          filters={filters}
-          onChange={setFilters}
+          initialData={initialData}
         />
-      </div>
+      ) : (
+        <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-5 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 gap-4 border-b border-neutral-800/50 pb-4">
+            <h3 className="text-lg font-bold text-white flex items-center tracking-tight">
+              <span className="w-1.5 h-5 bg-red-600 rounded-full mr-3 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span>
+              Matchup Configuration
+            </h3>
+
+            <RoleFilter selectedRole={role} onChange={handleRoleChange} />
+          </div>
+
+          <ChampionFilterBlock
+            role={role}
+            champions={champions}
+            filters={filters}
+            onChange={setFilters}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <MatchupStrategyEditor notes={notes} onChange={setNotes} />
 
         <div className="space-y-6">
-          {mode === "edit" && initialData && (
-            <MatchupRecordBox wins={initialData.wins || 0} losses={initialData.losses || 0} />
-          )}
 
           <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-5 shadow-sm">
             <h3 className="text-md font-bold text-white mb-4">Lane Priority</h3>
