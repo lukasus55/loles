@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -40,11 +41,14 @@ export const MobileNav = () => {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex flex-col animate-in fade-in slide-in-from-right-8 duration-300">
+        <div className="fixed top-0 left-0 w-screen h-[100dvh] z-[100] bg-black flex flex-col animate-in fade-in slide-in-from-right-8 duration-300">
           <div className="flex items-center justify-between p-4 h-16 border-b border-neutral-800/50">
-            <span className="text-2xl font-bold text-white tracking-tight ml-2">
-              LOL<span className="text-red-500">ES</span>
-            </span>
+            <Link href="/" onClick={() => setIsOpen(false)} className="flex items-center space-x-1 ml-2">
+              <Image src="/icon.svg" alt="MatchNotes Icon" width={16} height={16} />
+              <span className="flex h-full items-center pb-1 text-xl font-bold text-white tracking-tight">
+                LOLES
+              </span>
+            </Link>
             <button
               onClick={() => setIsOpen(false)}
               className="p-2 text-neutral-400 hover:text-white transition-colors cursor-pointer"

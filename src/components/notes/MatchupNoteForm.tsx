@@ -181,32 +181,32 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href={backUrl} className="p-2 bg-neutral-900 border border-neutral-800 rounded-lg hover:bg-neutral-800 transition-colors">
             <ArrowLeft className="w-5 h-5 text-neutral-400" />
           </Link>
-          <h1 className="text-3xl font-bold text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
             {mode === "create" ? "Create Matchup Note" : "Edit Matchup Note"}
           </h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 w-full md:w-auto">
           {mode === "edit" && (
             <Button
               onClick={handleDeleteClick}
               disabled={isDeleting || isSaving}
               variant="outline"
-              className="flex items-center gap-2 border-red-900/50 text-red-500 hover:bg-red-950/40 hover:text-red-400 px-4"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 border-red-900/50 text-red-500 hover:bg-red-950/40 hover:text-red-400 px-4"
             >
               {isDeleting ? (
                 <Spinner size="sm" className="mr-1" />
               ) : (
                 <Trash2 className="w-4 h-4" />
               )}
-              <span className="hidden sm:inline">Delete Note</span>
+              <span>Delete Note</span>
             </Button>
           )}
-          <Button onClick={handleSave} disabled={isSaving || collisionId !== null || isDeleting} className="flex items-center gap-2 px-6 min-w-[140px] justify-center">
+          <Button onClick={handleSave} disabled={isSaving || collisionId !== null || isDeleting} className="flex-1 md:flex-none flex items-center gap-2 px-6 justify-center">
             {isSaving ? (
               <>
                 <Spinner size="sm" className="mr-1" /> Saving...
