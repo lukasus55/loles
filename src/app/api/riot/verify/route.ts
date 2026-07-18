@@ -16,19 +16,41 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
 
-    if (action === "CHECK") {
+    if (action === "LINK") {
       const accountData = await fetchRiotAccount(gameName, tagLine, region);
       const summonerData = await fetchSummonerByPuuid(accountData.puuid, region);
       
-      let targetIconId = Math.floor(Math.random() * 28) + 1;
-      if (targetIconId === summonerData.profileIconId) {
-         targetIconId = (targetIconId % 28) + 1;
+      await prisma.riotAccount.deleteMany({
+        where: { userId: session.user.id }
+      });
+
+      const newRiotAccount = await prisma.riotAccount.create({
+        data: {
+          userId: session.user.id,
+          puuid: accountData.puuid,
+          gameName: accountData.gameName || gameName,
+          tagLine: accountData.tagLine || tagLine,
+          region,
+          profileIconId: summonerData.profileIconId,
+          isVerified: false
+        }
+      });
+      return NextResponse.json({ success: true, account: newRiotAccount });
+    }
+
+    if (action === "START_VERIFY") {
+      const accountData = await fetchRiotAccount(gameName, tagLine, region);
+      const summonerData = await fetchSummonerByPuuid(accountData.puuid, region);
+      
+      let newTargetIconId = Math.floor(Math.random() * 28) + 1;
+      if (newTargetIconId === summonerData.profileIconId) {
+         newTargetIconId = (newTargetIconId % 28) + 1;
       }
       
       return NextResponse.json({ 
         puuid: accountData.puuid,
         currentIconId: summonerData.profileIconId,
-        expectedIconId: targetIconId
+        expectedIconId: newTargetIconId
       });
     }
 
@@ -37,22 +59,16 @@ export async function POST(req: Request) {
       const summonerData = await fetchSummonerByPuuid(accountData.puuid, region);
       
       if (summonerData.profileIconId === targetIconId) {
-        // Linked!
-        await prisma.riotAccount.deleteMany({
-          where: { userId: session.user.id }
-        });
-
-        const newRiotAccount = await prisma.riotAccount.create({
+        // Verified!
+        const updatedAccount = await prisma.riotAccount.update({
+          where: { userId: session.user.id },
           data: {
-            userId: session.user.id,
-            puuid: accountData.puuid,
-            gameName,
-            tagLine,
-            region,
+            isVerified: true,
             profileIconId: summonerData.profileIconId
           }
         });
-        return NextResponse.json({ success: true, account: newRiotAccount });
+
+        return NextResponse.json({ success: true, account: updatedAccount });
       } else {
         return NextResponse.json({ 
           success: false, 

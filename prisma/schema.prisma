@@ -93,6 +93,7 @@ model RiotAccount {
   rank          String?
   leaguePoints  Int?
   lastSyncedAt  DateTime?
+  isVerified    Boolean  @default(false)
   
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   

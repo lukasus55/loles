@@ -10,7 +10,7 @@ interface AccountInputStepProps {
   setTagLine: (val: string) => void;
   region: string;
   setRegion: (val: string) => void;
-  onCheck: () => void;
+  onLink: () => void;
   isLoading: boolean;
 }
 
@@ -21,7 +21,7 @@ export const AccountInputStep: React.FC<AccountInputStepProps> = ({
   setTagLine,
   region,
   setRegion,
-  onCheck,
+  onLink,
   isLoading
 }) => {
   const REGIONS = [
@@ -79,8 +79,8 @@ export const AccountInputStep: React.FC<AccountInputStepProps> = ({
       </div>
 
       <div className="flex justify-end pt-4">
-        <Button onClick={onCheck} disabled={isLoading} className="px-8 min-w-[160px] flex items-center justify-center">
-          {isLoading ? <Spinner size="sm" className="mr-2" /> : "Verify Account"}
+        <Button onClick={onLink} disabled={isLoading} className="px-8 min-w-[160px] flex items-center justify-center">
+          {isLoading ? <Spinner size="sm" className="mr-2" /> : "Link Account"}
         </Button>
       </div>
     </div>
