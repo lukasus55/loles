@@ -40,7 +40,7 @@ const PRIO_OPTIONS = ["Yes", "50/50", "No", "N/A"];
 
 export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champions, initialData, initialFilters, from }) => {
   const router = useRouter();
-  const backUrl = from === "history" ? "/history" : "/notes";
+  const backUrl = from === "history" ? "/history" : from === "stats" ? "/stats" : "/notes";
   const [role, setRole] = useState<Role>(initialData?.role || initialFilters?.role || "TOP");
   const [filters, setFilters] = useState<MatchupFilters>({
     myPick: initialData?.myChampion || initialFilters?.myPick || null,
@@ -57,8 +57,8 @@ export const MatchupNoteForm: React.FC<MatchupNoteFormProps> = ({ mode, champion
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleRoleChange = (newRole: Role) => {
-    if (mode === "edit") return;
+  const handleRoleChange = (newRole: Role | null) => {
+    if (mode === "edit" || !newRole) return;
     setRole(newRole);
     setFilters({ myPick: null, enemyPick: null, mySupp: null, enemySupp: null });
   };

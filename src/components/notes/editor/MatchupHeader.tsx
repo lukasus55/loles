@@ -8,7 +8,7 @@ import { Spinner } from '@/components/ui/Spinner';
 
 interface MatchupHeaderProps {
   filters: MatchupFilters;
-  role: Role;
+  role: Role | null;
   champions: ChampionData[];
   initialData?: {
     wins?: number;
@@ -32,11 +32,12 @@ export const MatchupHeader: React.FC<MatchupHeaderProps> = ({ filters, role, cha
       if (!filters.myPick || !filters.enemyPick) return;
       setIsLoading(true);
       try {
-        const query = new URLSearchParams({
-          role,
+        const queryParams: Record<string, string> = {
+          role: role || "null",
           myPick: filters.myPick,
           enemyPick: filters.enemyPick,
-        });
+        };
+        const query = new URLSearchParams(queryParams);
         if (isBotLane && filters.mySupp) query.append("mySupp", filters.mySupp);
         if (isBotLane && filters.enemySupp) query.append("enemySupp", filters.enemySupp);
 
@@ -66,7 +67,8 @@ export const MatchupHeader: React.FC<MatchupHeaderProps> = ({ filters, role, cha
     return champions.find(c => c.id === id)?.name || id;
   };
 
-  const getRoleIcon = (roleId: string) => {
+  const getRoleIcon = (roleId: string | null) => {
+    if (!roleId) return "";
     switch (roleId) {
       case "JGL": return "/roles/jg.webp";
       case "SUPP": return "/roles/supp.webp";
@@ -199,8 +201,8 @@ export const MatchupHeader: React.FC<MatchupHeaderProps> = ({ filters, role, cha
       </div>
 
       <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-neutral-900 border border-neutral-800 border-t-0 rounded-b-xl px-4 py-1.5 flex items-center gap-2 shadow-md z-20">
-        <img src={getRoleIcon(role)} alt={role} className="w-4 h-4 opacity-80 filter brightness-150" />
-        <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest">{role === "JGL" ? "Jungle" : role === "SUPP" ? "Support" : role} Lane</span>
+        {role && <img src={getRoleIcon(role)} alt={role} className="w-4 h-4 opacity-80 filter brightness-150" />}
+        <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest">{role ? (role === "JGL" ? "Jungle" : role === "SUPP" ? "Support" : role) + " Lane" : "All Roles"}</span>
       </div>
 
       <div className="relative z-30 w-full mx-auto p-5 sm:p-8 pt-10 sm:pt-12">

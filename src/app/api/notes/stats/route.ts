@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     const myPick = searchParams.get("myPick");
     const enemyPick = searchParams.get("enemyPick");
     
-    if (!role || !myPick || !enemyPick) {
+    if (!myPick || !enemyPick) {
       return NextResponse.json({ message: "Missing required parameters" }, { status: 400 });
     }
 
@@ -28,14 +28,17 @@ export async function GET(req: Request) {
       SUPP: "UTILITY"
     };
 
-    const riotRole = roleMapping[role.toUpperCase()] || "UNKNOWN";
 
     const whereClause: any = {
       userId: session.user.id,
-      role: riotRole,
       championName: myPick,
       enemyChampionName: enemyPick
     };
+
+    if (role && role !== "null") {
+      const riotRole = roleMapping[role.toUpperCase()] || "UNKNOWN";
+      whereClause.role = riotRole;
+    }
 
     if (role === "ADC" || role === "SUPP") {
       const partnerPick = searchParams.get("mySupp");

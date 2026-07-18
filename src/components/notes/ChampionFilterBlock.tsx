@@ -12,7 +12,7 @@ export interface MatchupFilters {
 }
 
 interface ChampionFilterBlockProps {
-  role: Role;
+  role: Role | null;
   onRoleChange?: (role: Role) => void;
   champions: ChampionData[];
   filters: MatchupFilters;

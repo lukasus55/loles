@@ -30,7 +30,8 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ champions, pre
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const handleRoleChange = (newRole: Role) => {
+  const handleRoleChange = (newRole: Role | null) => {
+    if (!newRole) return;
     setRole(newRole);
     setFilters({ myPick: null, enemyPick: null, mySupp: null, enemySupp: null });
   };

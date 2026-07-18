@@ -6,7 +6,8 @@ export type Role = "TOP" | "JGL" | "MID" | "ADC" | "SUPP";
 
 interface RoleFilterProps {
   selectedRole: Role | null;
-  onChange: (role: Role) => void;
+  onChange: (role: Role | null) => void;
+  allowClear?: boolean;
 }
 
 const ROLES: { id: Role; label: string; icon: string }[] = [
@@ -17,13 +18,19 @@ const ROLES: { id: Role; label: string; icon: string }[] = [
   { id: "SUPP", label: "Support", icon: "/roles/supp.webp" },
 ];
 
-export const RoleFilter: React.FC<RoleFilterProps> = ({ selectedRole, onChange }) => {
+export const RoleFilter: React.FC<RoleFilterProps> = ({ selectedRole, onChange, allowClear = false }) => {
   return (
     <div className="flex items-center space-x-2 bg-neutral-900 border border-neutral-800 p-2 rounded-xl w-fit shadow-sm">
       {ROLES.map((role) => (
         <button
           key={role.id}
-          onClick={() => onChange(role.id)}
+          onClick={() => {
+            if (allowClear && selectedRole === role.id) {
+              onChange(null);
+            } else {
+              onChange(role.id);
+            }
+          }}
           title={role.label}
           className={`relative p-3 rounded-lg transition-all duration-200 cursor-pointer group ${selectedRole === role.id
               ? "bg-red-950/40 border border-red-900/50"

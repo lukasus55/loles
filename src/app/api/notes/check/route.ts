@@ -18,10 +18,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
     
-    if ((role === "ADC" || role === "SUPP") && (!mySupp || !enemySupp)) {
-      return NextResponse.json({ message: "Missing support fields for bot lane" }, { status: 400 });
-    }
-
     const whereClause: any = {
       userId: session.user.id,
       role: role as Role,
@@ -30,8 +26,8 @@ export async function POST(req: Request) {
     };
 
     if (role === "ADC" || role === "SUPP") {
-      whereClause.mySupport = mySupp;
-      whereClause.enemySupport = enemySupp;
+      if (mySupp) whereClause.mySupport = mySupp;
+      if (enemySupp) whereClause.enemySupport = enemySupp;
     } else {
       whereClause.mySupport = null;
       whereClause.enemySupport = null;
