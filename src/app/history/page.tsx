@@ -37,8 +37,6 @@ export default async function HistoryPage() {
   const champions = await getChampions();
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <HistoryClient initialMatches={matches} riotAccount={riotAccount} champions={champions} existingNotes={existingNotes} />
-    </div>
+    <HistoryClient initialMatches={matches} riotAccount={riotAccount} champions={champions} existingNotes={existingNotes} />
   );
 }

@@ -6,6 +6,7 @@ import { RefreshCw, AlertTriangle, ShieldAlert, Swords } from "lucide-react";
 import { MatchCard } from "./MatchCard";
 import Link from "next/link";
 import { useToast } from "@/components/ui/ToastProvider";
+import { LinkAccountPrompt } from "@/components/account/LinkAccountPrompt";
 
 export const HistoryClient = ({ initialMatches, riotAccount, champions, existingNotes = [] }: any) => {
   const [isSyncing, setIsSyncing] = useState(false);
@@ -91,93 +92,86 @@ export const HistoryClient = ({ initialMatches, riotAccount, champions, existing
   };
 
   if (!riotAccount) {
-    return (
-      <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-10 text-center shadow-sm">
-        <ShieldAlert className="w-16 h-16 text-neutral-500 mx-auto mb-4 opacity-50" />
-        <h2 className="text-2xl font-bold text-white mb-2">No Riot Account Linked</h2>
-        <p className="text-neutral-400 max-w-md mx-auto mb-8">
-          You need to link your League of Legends account before you can sync and view your match history.
-        </p>
-        <Link href="/account">
-          <Button className="px-8 bg-red-600 hover:bg-red-700 text-white">Link Account</Button>
-        </Link>
-      </div>
-    );
+    return <div className="flex-1 flex flex-col justify-center p-8 w-full max-w-3xl mx-auto">
+      <LinkAccountPrompt />
+    </div>;
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-900/60 border border-neutral-800 p-6 rounded-xl shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-            <span className="w-1.5 h-6 bg-red-600 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)]"></span>
-            Match History
-          </h1>
-          <p className="text-neutral-400 mt-1 text-sm">
-            Synced from <strong className="text-neutral-300">{riotAccount.gameName}#{riotAccount.tagLine}</strong> ({riotAccount.region})
-          </p>
-        </div>
-        <div className="flex flex-col sm:items-end gap-2">
-          <Button
-            onClick={handleSync}
-            disabled={isSyncing || syncCooldown > 0}
-            className="px-6 min-w-[140px] flex items-center justify-center transition-colors shadow-sm bg-neutral-900 border border-red-500/50 text-red-500 hover:bg-red-500/10 hover:border-red-500 disabled:opacity-75 disabled:bg-neutral-800 disabled:border-neutral-600 disabled:text-neutral-300 disabled:cursor-not-allowed disabled:hover:bg-neutral-800"
-          >
-            {isSyncing ? (
-              <><Spinner size="sm" className="mr-2 border-red-500" /> Syncing...</>
-            ) : syncCooldown > 0 ? (
-              `Wait ${syncCooldown}s`
-            ) : (
-              <><RefreshCw className="w-4 h-4 mr-2" /> Update</>
-            )}
-          </Button>
-          {riotAccount.lastSyncedAt && (
-            <span className="text-xs text-neutral-500 font-medium">
-              Last synced: {mounted ? timeAgo(riotAccount.lastSyncedAt) : "Just now"}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {matches.length === 0 ? (
-        <div className="text-center py-16 bg-neutral-900/30 border border-neutral-800 rounded-xl">
-          <p className="text-neutral-500 mb-4">No matches synced yet.</p>
-          <Button onClick={handleSync} variant="outline" className="border-red-900/50 text-red-500 hover:bg-red-950/40">
-            Fetch Match History
-          </Button>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="space-y-3">
-            {matches.map((match: any) => (
-              <MatchCard
-                key={match.id}
-                match={match}
-                champions={champions}
-                existingNotes={existingNotes}
-                mounted={mounted}
-              />
-            ))}
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-900/60 border border-neutral-800 p-6 rounded-xl shadow-sm">
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span className="w-1.5 h-6 bg-red-600 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)]"></span>
+              Match History
+            </h1>
+            <p className="text-neutral-400 mt-1 text-sm">
+              Synced from <strong className="text-neutral-300">{riotAccount.gameName}#{riotAccount.tagLine}</strong> ({riotAccount.region})
+            </p>
           </div>
-
-          {hasMore && (
-            <div className="flex justify-center pt-6 pb-12">
-              <Button
-                onClick={loadMore}
-                disabled={isLoadingMore}
-                variant="outline"
-                className="w-full sm:w-auto min-w-[200px] border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
-              >
-                {isLoadingMore ? (
-                  <><Spinner size="sm" className="mr-2" /> Loading more...</>
-                ) : (
-                  "Load More Matches"
-                )}
-              </Button>
-            </div>
-          )}
+          <div className="flex flex-col sm:items-end gap-2">
+            <Button
+              onClick={handleSync}
+              disabled={isSyncing || syncCooldown > 0}
+              className="px-6 min-w-[140px] flex items-center justify-center transition-colors shadow-sm bg-neutral-900 border border-red-500/50 text-red-500 hover:bg-red-500/10 hover:border-red-500 disabled:opacity-75 disabled:bg-neutral-800 disabled:border-neutral-600 disabled:text-neutral-300 disabled:cursor-not-allowed disabled:hover:bg-neutral-800"
+            >
+              {isSyncing ? (
+                <><Spinner size="sm" className="mr-2 border-red-500" /> Syncing...</>
+              ) : syncCooldown > 0 ? (
+                `Wait ${syncCooldown}s`
+              ) : (
+                <><RefreshCw className="w-4 h-4 mr-2" /> Update</>
+              )}
+            </Button>
+            {riotAccount.lastSyncedAt && (
+              <span className="text-xs text-neutral-500 font-medium">
+                Last synced: {mounted ? timeAgo(riotAccount.lastSyncedAt) : "Just now"}
+              </span>
+            )}
+          </div>
         </div>
-      )}
+
+        {matches.length === 0 ? (
+          <div className="text-center py-16 bg-neutral-900/30 border border-neutral-800 rounded-xl">
+            <p className="text-neutral-500 mb-4">No matches synced yet.</p>
+            <Button onClick={handleSync} variant="outline" className="border-red-900/50 text-red-500 hover:bg-red-950/40">
+              Fetch Match History
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="space-y-3">
+              {matches.map((match: any) => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  champions={champions}
+                  existingNotes={existingNotes}
+                  mounted={mounted}
+                />
+              ))}
+            </div>
+
+            {hasMore && (
+              <div className="flex justify-center pt-6 pb-12">
+                <Button
+                  onClick={loadMore}
+                  disabled={isLoadingMore}
+                  variant="outline"
+                  className="w-full sm:w-auto min-w-[200px] border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
+                >
+                  {isLoadingMore ? (
+                    <><Spinner size="sm" className="mr-2" /> Loading more...</>
+                  ) : (
+                    "Load More Matches"
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

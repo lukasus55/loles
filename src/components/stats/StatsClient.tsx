@@ -4,14 +4,23 @@ import React from "react";
 import { GeneralStatsCards } from "./GeneralStatsCards";
 import { ChampionPerformanceTable } from "./ChampionPerformanceTable";
 import { MatchupInsights } from "./MatchupInsights";
+import { LinkAccountPrompt } from "@/components/account/LinkAccountPrompt";
 
 export const StatsClient = ({ data }: { data: any }) => {
 
-  if (!data || data.totalMatches === 0 || !data.riotAccount) {
+  if (!data?.riotAccount) {
+    return (
+      <div className="flex-1 flex flex-col justify-center p-8 w-full max-w-3xl mx-auto">
+        <LinkAccountPrompt />
+      </div>
+    );
+  }
+
+  if (data.totalMatches === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center max-w-lg mx-auto">
-        <h2 className="text-2xl font-bold text-white mb-4">No Data Available</h2>
-        <p className="text-neutral-400">You need to link your Riot Account and sync your matches in the Match History tab before viewing stats.</p>
+        <h2 className="text-2xl font-bold text-white mb-4">No Matches Synced</h2>
+        <p className="text-neutral-400">You need to sync your matches in the Match History tab before viewing stats.</p>
       </div>
     );
   }
