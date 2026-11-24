@@ -148,8 +148,8 @@ export const Tooltip = ({
   const baseCardStyle = cardClassName
     ? cardClassName
     : compact
-    ? "px-2.5 py-1.5 text-xs font-medium text-neutral-100 whitespace-nowrap"
-    : "min-w-[220px] max-w-[300px] p-3 flex flex-col gap-2";
+      ? "px-2.5 py-1.5 text-xs font-medium text-neutral-100 whitespace-nowrap"
+      : "min-w-[220px] max-w-[300px] p-3 flex flex-col gap-2";
 
   return (
     <div
@@ -174,7 +174,7 @@ export const Tooltip = ({
               opacity: 0,
               transform: "scale(0.97)",
             }}
-            className={`z-[9999] pointer-events-none transition-[opacity,transform] duration-150 bg-[#0b0d12]/98 backdrop-blur-md border border-neutral-700/80 text-neutral-300 rounded-lg shadow-2xl shadow-black/70 ${baseCardStyle}`}
+            className={`z-[9999] pointer-events-none transition-[opacity,transform] duration-150 bg-bg-500/95 backdrop-blur-lg border border-neutral-700/80 text-neutral-300 rounded-lg shadow-2xl shadow-black/70 ${baseCardStyle}`}
           >
             {(title || Icon) && (
               <div className="flex items-center gap-2 border-b border-neutral-800/80 pb-2 mb-0.5">

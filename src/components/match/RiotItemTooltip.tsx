@@ -4,145 +4,39 @@ import React from "react";
 import { ItemSummary } from "@/lib/riot/assets";
 
 interface StatVisual {
-  color: string;
-  symbol: React.ReactNode;
+  iconSrc: string | null;
+  alt: string;
 }
 
+/**
+ * Maps Riot DDragon <stats> labels to official League of Legends colored stat icons
+ * stored locally in /public/stats/. Specific matches precede general ones.
+ */
 function getStatVisual(label: string): StatVisual {
   const lower = label.toLowerCase();
 
-  // Ability Power
-  if (lower.includes("ability power")) {
-    return {
-      color: "text-[#9B7BFF]",
-      symbol: (
-        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0 text-[#9B7BFF]" fill="currentColor">
-          <path d="M11.8 1.5l2.7 2.7-1.6 1.6-2.7-2.7 1.6-1.6zM9.2 4.1l2.7 2.7-6.4 6.4-3.3.6.6-3.3 6.4-6.4z" />
-        </svg>
-      ),
-    };
-  }
-  // Attack Damage
-  if (lower.includes("attack damage")) {
-    return {
-      color: "text-[#FF8C42]",
-      symbol: (
-        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0 text-[#FF8C42]" fill="currentColor">
-          <path d="M13.5 2.5L12 6l-5 5 1 1-1.2 1.2-1.5-1.5-1.6 1.6-1-1 1.6-1.6-1.5-1.5L4 8l1 1 5-5 3.5-1.5z" />
-        </svg>
-      ),
-    };
-  }
-  // Attack Speed
-  if (lower.includes("attack speed")) {
-    return {
-      color: "text-[#FDE047]",
-      symbol: (
-        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0 text-[#FDE047]" fill="currentColor">
-          <path d="M9.5 1.5L4 8.5h4l-1.5 6L12 7.5H8l1.5-6z" />
-        </svg>
-      ),
-    };
-  }
-  // Critical Strike
-  if (lower.includes("critical")) {
-    return {
-      color: "text-[#F87171]",
-      symbol: (
-        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0 text-[#F87171]" fill="currentColor">
-          <path d="M8 1l1.8 4.4L14.5 6l-3.6 3.1 1.1 4.6L8 11.2 4 13.7l1.1-4.6L1.5 6l4.7-.6L8 1z" />
-        </svg>
-      ),
-    };
-  }
-  // Move Speed
-  if (lower.includes("move speed")) {
-    return {
-      color: "text-[#E2E8F0]",
-      symbol: (
-        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0 text-[#FCD34D]" fill="currentColor">
-          <path d="M2 10.5c3.5 0 5.5-2 7-5.5l2 1.5c-.6 1.8-.3 3 1.5 3.5l1.5.5v2H2v-2z" />
-        </svg>
-      ),
-    };
-  }
-  // Health / Health Regen
-  if (lower.includes("health") || lower.includes("heal")) {
-    return {
-      color: "text-[#4ADE80]",
-      symbol: (
-        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0 text-[#4ADE80]" fill="currentColor">
-          <path d="M8 13.8l-1-.9C3.6 9.8 1.8 8.1 1.8 5.8 1.8 3.9 3.3 2.5 5.1 2.5c1.1 0 2.2.5 2.9 1.4.7-.9 1.8-1.4 2.9-1.4 1.8 0 3.3 1.4 3.3 3.3 0 2.3-1.8 4-5.2 7.1l-1 .9z" />
-        </svg>
-      ),
-    };
-  }
-  // Armor
-  if (lower.includes("armor") && !lower.includes("penetration")) {
-    return {
-      color: "text-[#FBBF24]",
-      symbol: (
-        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0 text-[#FBBF24]" fill="currentColor">
-          <path d="M8 1.5L2.5 3.8v4.1c0 3.3 2.3 5.7 5.5 6.6 3.2-.9 5.5-3.3 5.5-6.6V3.8L8 1.5z" />
-        </svg>
-      ),
-    };
-  }
-  // Magic Resist
-  if (lower.includes("magic resist")) {
-    return {
-      color: "text-[#38BDF8]",
-      symbol: (
-        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0 text-[#38BDF8]" fill="currentColor">
-          <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm0 2.2a4.3 4.3 0 110 8.6 4.3 4.3 0 010-8.6z" />
-        </svg>
-      ),
-    };
-  }
-  // Mana
-  if (lower.includes("mana")) {
-    return {
-      color: "text-[#60A5FA]",
-      symbol: (
-        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0 text-[#60A5FA]" fill="currentColor">
-          <path d="M8 1.8C8 1.8 3.5 6.7 3.5 10a4.5 4.5 0 009 0c0-3.3-4.5-8.2-4.5-8.2z" />
-        </svg>
-      ),
-    };
-  }
-  // Ability Haste
-  if (lower.includes("haste")) {
-    return {
-      color: "text-[#2DD4BF]",
-      symbol: (
-        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0 text-[#2DD4BF]" fill="currentColor">
-          <path d="M8 2a6 6 0 100 12A6 6 0 008 2zm.7 3v3.3l2.4 1.4-.7 1.2L7.3 9V5h1.4z" />
-        </svg>
-      ),
-    };
-  }
-  // Lethality / Armor Pen / Life Steal / Omnivamp
-  if (
-    lower.includes("lethality") ||
-    lower.includes("penetration") ||
-    lower.includes("life steal") ||
-    lower.includes("vamp")
-  ) {
-    return {
-      color: "text-[#FB7185]",
-      symbol: (
-        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0 text-[#FB7185]" fill="currentColor">
-          <path d="M12.5 2L3 11.5l1.5 1.5L14 3.5 12.5 2zM3.5 4L6 6.5 4.8 7.7 2.3 5.2 3.5 4z" />
-        </svg>
-      ),
-    };
-  }
+  if (lower.includes("ability power")) return { iconSrc: "/stats/ability-power.png", alt: "Ability Power" };
+  if (lower.includes("attack damage")) return { iconSrc: "/stats/attack-damage.png", alt: "Attack Damage" };
+  if (lower.includes("attack speed")) return { iconSrc: "/stats/attack-speed.png", alt: "Attack Speed" };
+  if (lower.includes("critical strike damage")) return { iconSrc: "/stats/crit-damage.png", alt: "Crit Damage" };
+  if (lower.includes("critical")) return { iconSrc: "/stats/crit-chance.png", alt: "Crit Chance" };
+  if (lower.includes("move speed")) return { iconSrc: "/stats/move-speed.png", alt: "Move Speed" };
+  if (lower.includes("heal and shield")) return { iconSrc: "/stats/heal-shield-power.png", alt: "Heal & Shield Power" };
+  if (lower.includes("health regen")) return { iconSrc: "/stats/health-regen.png", alt: "Health Regen" };
+  if (lower.includes("health")) return { iconSrc: "/stats/health.png", alt: "Health" };
+  if (lower.includes("armor penetration") || lower.includes("lethality")) return { iconSrc: "/stats/armor-pen.png", alt: "Armor Penetration" };
+  if (lower.includes("armor")) return { iconSrc: "/stats/armor.png", alt: "Armor" };
+  if (lower.includes("magic penetration")) return { iconSrc: "/stats/magic-pen.png", alt: "Magic Penetration" };
+  if (lower.includes("magic resist")) return { iconSrc: "/stats/magic-resist.png", alt: "Magic Resist" };
+  if (lower.includes("mana regen")) return { iconSrc: "/stats/mana-regen.png", alt: "Mana Regen" };
+  if (lower.includes("mana")) return { iconSrc: "/stats/mana.png", alt: "Mana" };
+  if (lower.includes("haste")) return { iconSrc: "/stats/ability-haste.png", alt: "Ability Haste" };
+  if (lower.includes("life steal")) return { iconSrc: "/stats/life-steal.png", alt: "Life Steal" };
+  if (lower.includes("omnivamp")) return { iconSrc: "/stats/omnivamp.png", alt: "Omnivamp" };
+  if (lower.includes("tenacity") || lower.includes("slow resist")) return { iconSrc: "/stats/tenacity.png", alt: "Tenacity" };
+  if (lower.includes("gold")) return { iconSrc: "/stats/gold.png", alt: "Gold" };
 
-  // Generic stat fallback
-  return {
-    color: "text-neutral-300",
-    symbol: <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 shrink-0 mx-1" />,
-  };
+  return { iconSrc: null, alt: label };
 }
 
 function decodeEntities(text: string): string {
@@ -239,7 +133,6 @@ function parseRiotMarkup(input: string): ParsedNode[] {
     if (tagName === "br") {
       stack[stack.length - 1].children!.push({ type: "br" });
     } else if (isClosing) {
-      // Pop up to matching tag if present
       for (let i = stack.length - 1; i >= 1; i--) {
         if (stack[i].tag === tagName) {
           stack.length = i;
@@ -287,16 +180,14 @@ function renderAstNodes(nodes: ParsedNode[], keyPrefix = "n"): React.ReactNode[]
           </span>
         );
       } else if (node.tag === "passive" || node.tag === "active") {
-        // Ensure a passive/active title stands out cleanly with a small line break after it if followed by text
         const nextNode = nodes[i + 1];
         const nextIsBr = nextNode?.type === "br";
         const isActive = node.tag === "active";
         out.push(
           <span
             key={key}
-            className={`inline-block font-bold ${
-              isActive ? "text-amber-300" : "text-[#F0E6D2]"
-            } ${nextIsBr ? "" : "mr-1"}`}
+            className={`inline-block font-bold ${isActive ? "text-amber-300" : "text-[#F0E6D2]"
+              } ${nextIsBr ? "" : "mr-1"}`}
           >
             {isActive ? "Active - " : ""}
             {children}
@@ -331,9 +222,7 @@ function extractStatsAndBody(rawDescription: string): {
 } {
   if (!rawDescription) return { stats: [], bodyParagraphs: [] };
 
-  let working = rawDescription
-    .replace(/<\/?mainText>/gi, "")
-    .trim();
+  let working = rawDescription.replace(/<\/?mainText>/gi, "").trim();
 
   const stats: ParsedStatLine[] = [];
   const statsMatch = working.match(/<stats>([\s\S]*?)<\/stats>/i);
@@ -364,15 +253,13 @@ function extractStatsAndBody(rawDescription: string): {
     working = working.replace(statsMatch[0], "").trim();
   }
 
-  // Strip leading/trailing <br> tags left after removing <stats>
   working = working.replace(/^(<br\s*\/?>|\s)+/i, "").replace(/(<br\s*\/?>|\s)+$/i, "");
 
-  // Split double <br> into distinct paragraphs for clean League-style spacing between passives
   const bodyParagraphs = working
     ? working
-        .split(/(?:<br\s*\/?>\s*){2,}/i)
-        .map((p) => p.replace(/^(<br\s*\/?>|\s)+/i, "").replace(/(<br\s*\/?>|\s)+$/i, ""))
-        .filter(Boolean)
+      .split(/(?:<br\s*\/?>\s*){2,}/i)
+      .map((p) => p.replace(/^(<br\s*\/?>|\s)+/i, "").replace(/(<br\s*\/?>|\s)+$/i, ""))
+      .filter(Boolean)
     : [];
 
   return { stats, bodyParagraphs };
@@ -395,19 +282,19 @@ export const RiotItemTooltipContent: React.FC<RiotItemTooltipContentProps> = ({
 
   return (
     <div className="w-[290px] sm:w-[310px] text-left">
-      {/* League-style Header: Icon + Item Name + Gold */}
+      {/* League-style Header: Icon + Item Name + Official Gold Icon */}
       <div className="flex items-center gap-3 pb-2.5 border-b border-neutral-800/90">
-        <div className="w-10 h-10 rounded-md overflow-hidden border border-[#C89B3C]/50 bg-neutral-950 shrink-0 shadow-md">
+        <div className="w-10 h-10 rounded-md overflow-hidden border border-neutral-600 bg-neutral-950 shrink-0 shadow-md">
           <img src={iconUrl} alt={name} className="w-full h-full object-cover" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-[13px] font-bold text-[#F0E6D2] leading-snug truncate">{name}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
-            {/* Gold coin icon */}
-            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 text-[#C89B3C] shrink-0" fill="currentColor">
-              <circle cx="8" cy="8" r="6.5" opacity="0.25" />
-              <path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 1.6a4.4 4.4 0 110 8.8 4.4 4.4 0 010-8.8zm-.7 2v4.8h1.4V5.6H7.3z" />
-            </svg>
+            <img
+              src="/stats/gold.png"
+              alt="Gold"
+              className="w-3.5 h-3.5 object-contain shrink-0"
+            />
             <span className="text-xs font-semibold text-[#C89B3C]">
               {gold > 0 ? gold : "Free"}
             </span>
@@ -415,19 +302,27 @@ export const RiotItemTooltipContent: React.FC<RiotItemTooltipContentProps> = ({
         </div>
       </div>
 
-      {/* Stats Section */}
+      {/* Stats Section with Official Colored LoL Stat Icons */}
       {stats.length > 0 && (
-        <div className="py-2.5 space-y-1 border-b border-neutral-800/70 last:border-b-0">
+        <div className="py-2.5 space-y-1.5 border-b border-neutral-800/70 last:border-b-0">
           {stats.map((stat, idx) => {
             const visual = getStatVisual(stat.label);
             return (
               <div key={idx} className="flex items-center gap-2 text-[12px] leading-tight">
-                {visual.symbol}
-                <span className="text-neutral-200">
+                {visual.iconSrc ? (
+                  <img
+                    src={visual.iconSrc}
+                    alt={visual.alt}
+                    className="w-3.5 h-3.5 object-contain shrink-0"
+                  />
+                ) : (
+                  <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 shrink-0 mx-1" />
+                )}
+                <span className="text-[#C8C3B3]">
                   {stat.value && (
-                    <span className="font-semibold text-white mr-1">{stat.value}</span>
+                    <span className="font-semibold text-[#F0E6D2] mr-1">{stat.value}</span>
                   )}
-                  <span className={visual.color}>{stat.label}</span>
+                  <span>{stat.label}</span>
                 </span>
               </div>
             );

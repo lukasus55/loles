@@ -263,7 +263,7 @@ export const MatchItemsRow: React.FC<MatchItemsRowProps> = ({
         position="top"
       >
         <div
-          className={`${dimClass} overflow-hidden border border-neutral-700/80 bg-neutral-950 shrink-0 hover:border-amber-500/60 transition-colors`}
+          className={`${dimClass} overflow-hidden border border-neutral-700/80 bg-neutral-950 shrink-0 hover:border-neutral-400 transition-colors`}
         >
           <img
             src={iconUrl}
