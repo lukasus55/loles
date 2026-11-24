@@ -3,15 +3,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
-import { usePathname } from "next/navigation";
 
 export const MobileNav = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname();
-
-  useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     if (isOpen) {
@@ -25,9 +19,9 @@ export const MobileNav = () => {
   }, [isOpen]);
 
   const navLinks = [
-    { name: "Notes", href: "/notes" },
-    { name: "Match History", href: "/history" },
+    { name: "Matchups", href: "/matchups" },
     { name: "Stats", href: "/stats" },
+    { name: "Match History", href: "/history" },
   ];
 
   return (
@@ -63,6 +57,7 @@ export const MobileNav = () => {
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={() => setIsOpen(false)}
                 className="text-3xl font-bold text-neutral-300 hover:text-white transition-colors"
               >
                 {link.name}

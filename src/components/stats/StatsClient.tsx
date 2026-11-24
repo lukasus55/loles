@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { FileEdit, Loader2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { LinkAccountPrompt } from "@/components/account/LinkAccountPrompt";
 import { StatsFilters, StatsFilterState } from "./StatsFilters";
 import { StatsTable } from "./StatsTable";
@@ -12,6 +12,7 @@ import { MatchupHeader } from "@/components/notes/editor/MatchupHeader";
 import { Role } from "@/components/notes/RoleFilter";
 import { ChampionData } from "@/lib/riot/assets";
 import { Button } from "@/components/ui/Button";
+import { buildMatchupUrl } from "@/lib/matchup/url";
 import {
   StatsGroupBy,
   StatsMatchRecord,
@@ -20,7 +21,6 @@ import {
   computeSummaryStats,
   filterMatches,
   getAvailablePerspectives,
-  isBotLaneRole,
   resolveActivePerspective,
 } from "@/lib/stats/analytics";
 
@@ -43,7 +43,6 @@ export const StatsClient: React.FC<StatsClientProps> = ({
   preferredRole = null,
 }) => {
   const router = useRouter();
-  const [isOpeningNote, setIsOpeningNote] = useState(false);
 
   const [filters, setFilters] = useState<StatsFilterState>({
     season: null,
@@ -151,39 +150,19 @@ export const StatsClient: React.FC<StatsClientProps> = ({
     }));
   };
 
-  const handleOpenNote = async () => {
+  const handleOpenMatchupHub = () => {
     if (!filters.role || !filters.champions.myPick || !filters.champions.enemyPick) return;
-    setIsOpeningNote(true);
-    try {
-      const payload: Record<string, string> = {
+    const url = buildMatchupUrl(
+      {
         role: filters.role,
         myPick: filters.champions.myPick,
         enemyPick: filters.champions.enemyPick,
-      };
-      if (isBotLaneRole(filters.role)) {
-        if (filters.champions.mySupp) payload.mySupp = filters.champions.mySupp;
-        if (filters.champions.enemySupp) payload.enemySupp = filters.champions.enemySupp;
-      }
-
-      const res = await fetch("/api/notes/check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.exists) {
-          router.push(`/note/${data.noteId}/edit?from=stats`);
-        } else {
-          const params = new URLSearchParams({ ...payload, from: "stats" });
-          router.push(`/note/new?${params.toString()}`);
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsOpeningNote(false);
-    }
+        mySupp: filters.champions.mySupp,
+        enemySupp: filters.champions.enemySupp,
+      },
+      { from: "stats" }
+    );
+    router.push(url);
   };
 
   const enemySidebarTitle =
@@ -222,22 +201,18 @@ export const StatsClient: React.FC<StatsClientProps> = ({
             />
             <div className="flex flex-col items-center">
               <Button
-                onClick={handleOpenNote}
-                disabled={isOpeningNote || !filters.role}
+                onClick={handleOpenMatchupHub}
+                disabled={!filters.role}
                 variant="primary"
                 size="lg"
                 className="w-full max-w-sm flex items-center justify-center gap-2 disabled:cursor-not-allowed"
               >
-                {isOpeningNote ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <FileEdit className="w-4 h-4" />
-                )}
-                {isOpeningNote ? "Opening..." : "Open Note for this Matchup"}
+                <span>Open Matchup Hub</span>
+                <ArrowRight className="w-4 h-4" />
               </Button>
               {!filters.role && (
                 <p className="text-xs text-neutral-500 text-center mt-2 font-medium">
-                  Select a role to open note
+                  Select a role to open Matchup Hub
                 </p>
               )}
             </div>

@@ -37,14 +37,14 @@ export const Navbar = async () => {
         </div>
 
         <nav className="hidden md:flex items-center justify-center space-x-6">
-          <Link href="/notes" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">
-            Notes
-          </Link>
-          <Link href="/history" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">
-            Match History
+          <Link href="/matchups" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">
+            Matchups
           </Link>
           <Link href="/stats" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">
             Stats
+          </Link>
+          <Link href="/history" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">
+            Match History
           </Link>
         </nav>
 

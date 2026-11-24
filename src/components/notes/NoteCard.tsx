@@ -1,6 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
-import { ChampionData } from '@/lib/riot/ddragon';
+import { ChampionData } from '@/lib/riot/assets';
+import { buildMatchupUrl } from '@/lib/matchup/url';
+import { Role } from './RoleFilter';
 
 // Defining it here since Prisma types on client can sometimes be tricky with dates
 export interface MatchupNoteDTO {
@@ -47,8 +49,19 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, champions }) => {
     </div>
   );
 
+  const matchupUrl = buildMatchupUrl(
+    {
+      role: note.role as Role,
+      myPick: note.myChampion,
+      enemyPick: note.enemyChampion,
+      mySupp: note.mySupport,
+      enemySupp: note.enemySupport,
+    },
+    { from: 'matchups' }
+  );
+
   return (
-    <Link href={`/note/${note.id}/edit`} className="block group h-full">
+    <Link href={matchupUrl} className="block group h-full cursor-pointer">
       <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 hover:border-red-900/80 transition-all shadow-sm hover:shadow-[0_0_20px_rgba(239,68,68,0.05)] h-full flex flex-col">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3 sm:gap-4">
@@ -79,7 +92,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, champions }) => {
         <div className="mt-4 flex items-center justify-between text-xs text-neutral-500 font-medium">
           <span>{new Date(note.updatedAt).toLocaleDateString()}</span>
           <span className="text-red-500 group-hover:text-red-400 group-hover:underline transition-colors flex items-center gap-1">
-            Edit Note
+            Open Matchup →
           </span>
         </div>
       </div>

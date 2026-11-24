@@ -8,6 +8,7 @@ import {
   MatchSpellsAndRunes,
 } from "@/components/match/MatchLoadoutDisplay";
 import { Tooltip } from "@/components/ui/Tooltip";
+import { buildMatchupUrl, mapRiotRoleToAppRole } from "@/lib/matchup/url";
 
 export interface MatchRecordDTO extends MatchLoadoutFields {
   id: string;
@@ -51,7 +52,6 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   match,
   champions,
   matchAssets,
-  existingNotes,
   mounted,
 }) => {
   const timeAgo = (dateStr: string | Date) => {
@@ -127,35 +127,22 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   const durationSecs = match.gameDuration % 60;
   const csPerMin = (match.cs / Math.max(1, match.gameDuration / 60)).toFixed(1);
 
-  const roleEnum =
-    match.role === "UTILITY"
-      ? "SUPP"
-      : match.role === "BOTTOM"
-      ? "ADC"
-      : match.role === "JUNGLE"
-      ? "JGL"
-      : match.role;
-  const isBot = match.role === "BOTTOM" || match.role === "UTILITY";
+  const appRole = mapRiotRoleToAppRole(match.role);
+  const roleEnum = appRole || match.role;
 
-  const existingNote = existingNotes.find(
-    (n) =>
-      n.role === roleEnum &&
-      n.myChampion === match.championName &&
-      n.enemyChampion === match.enemyChampionName &&
-      (!isBot ||
-        (n.mySupport === match.partnerChampionName &&
-          n.enemySupport === match.enemyPartnerChampionName))
-  );
-
-  let targetUrl = `/note/new?role=${roleEnum}&myPick=${match.championName}`;
-  if (existingNote) {
-    targetUrl = `/note/${existingNote.id}/edit?from=history`;
-  } else {
-    if (match.enemyChampionName) targetUrl += `&enemyPick=${match.enemyChampionName}`;
-    if (match.partnerChampionName) targetUrl += `&mySupp=${match.partnerChampionName}`;
-    if (match.enemyPartnerChampionName) targetUrl += `&enemySupp=${match.enemyPartnerChampionName}`;
-    targetUrl += `&from=history`;
-  }
+  const targetUrl =
+    appRole && match.enemyChampionName
+      ? buildMatchupUrl(
+          {
+            role: appRole,
+            myPick: match.championName,
+            enemyPick: match.enemyChampionName,
+            mySupp: match.partnerChampionName,
+            enemySupp: match.enemyPartnerChampionName,
+          },
+          { from: "history" }
+        )
+      : "/matchups";
 
   return (
     <Link
