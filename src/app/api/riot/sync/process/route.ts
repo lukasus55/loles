@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { fetchMatchDetails, fetchMatchTimeline } from "@/lib/riot/api";
+import { extractParticipantLoadout } from "@/lib/riot/loadout";
 
 export async function POST(req: Request) {
   try {
@@ -151,6 +152,8 @@ export async function POST(req: Request) {
           }
         }
 
+        const loadout = extractParticipantLoadout(p);
+
         await prisma.match.create({
           data: {
             matchId,
@@ -179,7 +182,8 @@ export async function POST(req: Request) {
             laneKills,
             enemyCsAt15,
             enemyGoldAt15,
-            enemyLaneKills
+            enemyLaneKills,
+            ...loadout
           }
         });
 

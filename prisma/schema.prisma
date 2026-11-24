@@ -140,11 +140,25 @@ model Match {
   enemyGoldAt15 Int?
   enemyLaneKills Int?
 
+  // Items, Summoner Spells & Runes (v1.1)
+  items            Int[]   @default([])
+  trinketId        Int?
+  summoner1Id      Int?
+  summoner2Id      Int?
+  primaryRuneStyle Int?
+  subRuneStyle     Int?
+  keystoneId       Int?
+  primaryRunes     Int[]   @default([])
+  subRunes         Int[]   @default([])
+  statShards       Int[]   @default([])
+  loadoutSynced    Boolean @default(false)
+
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@unique([matchId, userId])
   @@index([userId])
   @@index([userId, season])
   @@index([userId, championName])
+  @@index([userId, loadoutSynced])
   @@map("matches")
 }

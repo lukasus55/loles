@@ -1,5 +1,6 @@
 "use client";
-import React, { ReactNode } from "react";
+import React, { ReactNode, useCallback, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { LucideIcon } from "lucide-react";
 
 interface TooltipProps {
@@ -10,38 +11,183 @@ interface TooltipProps {
   iconClassName?: string;
   position?: "top" | "bottom" | "left" | "right";
   className?: string;
+  /** Compact single-line tooltip without large min-width (e.g. champion names) */
+  compact?: boolean;
+  /** Optional custom width / padding override for rich custom cards (e.g. LoL item tooltips) */
+  cardClassName?: string;
 }
 
-export const Tooltip = ({ 
-  children, 
-  content, 
+const VIEWPORT_MARGIN = 12;
+const GAP = 10;
+
+function getNavbarSafeTop(): number {
+  if (typeof document === "undefined") return 76;
+  const header = document.querySelector("header");
+  if (!header) return VIEWPORT_MARGIN;
+  const rect = header.getBoundingClientRect();
+  // Only avoid headers pinned near the top of the viewport
+  if (rect.top <= 4 && rect.bottom > 0 && rect.bottom < window.innerHeight / 2) {
+    return Math.max(VIEWPORT_MARGIN, rect.bottom + 10);
+  }
+  return VIEWPORT_MARGIN;
+}
+
+export const Tooltip = ({
+  children,
+  content,
   title,
   icon: Icon,
   iconClassName = "text-neutral-400",
-  position = "top", 
-  className = "inline-flex" 
+  position = "top",
+  className = "inline-flex",
+  compact = false,
+  cardClassName,
 }: TooltipProps) => {
-  const positionClasses = {
-    top: "bottom-full left-1/2 -translate-x-1/2 mb-2 origin-bottom",
-    bottom: "top-full left-1/2 -translate-x-1/2 mt-2 origin-top",
-    left: "right-full top-1/2 -translate-y-1/2 mr-2 origin-right",
-    right: "left-full top-1/2 -translate-y-1/2 ml-2 origin-left",
-  };
+  const [isOpen, setIsOpen] = useState(false);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  const updatePosition = useCallback(() => {
+    const triggerEl = triggerRef.current;
+    const tooltipEl = tooltipRef.current;
+    if (!triggerEl || !tooltipEl) return;
+
+    const triggerRect = triggerEl.getBoundingClientRect();
+    const tooltipRect = tooltipEl.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    const safeTop = getNavbarSafeTop();
+    const safeBottom = vh - VIEWPORT_MARGIN;
+    const safeLeft = VIEWPORT_MARGIN;
+    const safeRight = vw - VIEWPORT_MARGIN;
+
+    const tw = tooltipRect.width;
+    const th = tooltipRect.height;
+
+    let top = 0;
+    let left = 0;
+
+    if (position === "top" || position === "bottom") {
+      const spaceAbove = triggerRect.top - safeTop;
+      const spaceBelow = safeBottom - triggerRect.bottom;
+
+      let resolvedVertical: "top" | "bottom" = position;
+      if (position === "top" && th + GAP > spaceAbove) {
+        if (th + GAP <= spaceBelow || spaceBelow > spaceAbove) {
+          resolvedVertical = "bottom";
+        }
+      } else if (position === "bottom" && th + GAP > spaceBelow) {
+        if (th + GAP <= spaceAbove || spaceAbove > spaceBelow) {
+          resolvedVertical = "top";
+        }
+      }
+
+      top =
+        resolvedVertical === "top"
+          ? triggerRect.top - th - GAP
+          : triggerRect.bottom + GAP;
+
+      // Clamp vertically so extraordinarily tall tooltips never slide under the navbar or off-screen
+      const maxTop = Math.max(safeTop, safeBottom - th);
+      top = Math.min(Math.max(top, safeTop), maxTop);
+
+      // Center horizontally on trigger, then clamp within viewport edges
+      left = triggerRect.left + triggerRect.width / 2 - tw / 2;
+      const maxLeft = Math.max(safeLeft, safeRight - tw);
+      left = Math.min(Math.max(left, safeLeft), maxLeft);
+    } else {
+      const spaceLeft = triggerRect.left - safeLeft;
+      const spaceRight = safeRight - triggerRect.right;
+
+      let resolvedHorizontal: "left" | "right" = position;
+      if (position === "left" && tw + GAP > spaceLeft) {
+        if (tw + GAP <= spaceRight || spaceRight > spaceLeft) {
+          resolvedHorizontal = "right";
+        }
+      } else if (position === "right" && tw + GAP > spaceRight) {
+        if (tw + GAP <= spaceLeft || spaceLeft > spaceRight) {
+          resolvedHorizontal = "left";
+        }
+      }
+
+      left =
+        resolvedHorizontal === "left"
+          ? triggerRect.left - tw - GAP
+          : triggerRect.right + GAP;
+
+      const maxLeft = Math.max(safeLeft, safeRight - tw);
+      left = Math.min(Math.max(left, safeLeft), maxLeft);
+
+      top = triggerRect.top + triggerRect.height / 2 - th / 2;
+      const maxTop = Math.max(safeTop, safeBottom - th);
+      top = Math.min(Math.max(top, safeTop), maxTop);
+    }
+
+    tooltipEl.style.left = `${Math.round(left)}px`;
+    tooltipEl.style.top = `${Math.round(top)}px`;
+    tooltipEl.style.opacity = "1";
+    tooltipEl.style.transform = "scale(1)";
+  }, [position]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+
+    updatePosition();
+
+    const handleReposition = () => updatePosition();
+    window.addEventListener("scroll", handleReposition, { capture: true, passive: true });
+    window.addEventListener("resize", handleReposition, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleReposition, { capture: true });
+      window.removeEventListener("resize", handleReposition);
+    };
+  }, [isOpen, updatePosition]);
+
+  const baseCardStyle = cardClassName
+    ? cardClassName
+    : compact
+    ? "px-2.5 py-1.5 text-xs font-medium text-neutral-100 whitespace-nowrap"
+    : "min-w-[220px] max-w-[300px] p-3 flex flex-col gap-2";
 
   return (
-    <div className={`group/tooltip relative ${className}`}>
+    <div
+      ref={triggerRef}
+      className={`relative ${className}`}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+      onFocus={() => setIsOpen(true)}
+      onBlur={() => setIsOpen(false)}
+    >
       {children}
-      <div className={`absolute z-[100] invisible opacity-0 scale-95 group-hover/tooltip:visible group-hover/tooltip:opacity-100 group-hover/tooltip:scale-100 transition-all duration-200 pointer-events-none bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg shadow-xl ${positionClasses[position]} min-w-[220px] max-w-[280px] p-3 flex flex-col gap-2`}>
-        {(title || Icon) && (
-          <div className="flex items-center gap-2 border-b border-neutral-800/60 pb-2 mb-1">
-            {Icon && <Icon className={`w-4 h-4 shrink-0 ${iconClassName}`} />}
-            {title && <span className="font-bold text-sm text-neutral-200">{title}</span>}
-          </div>
+      {isOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={tooltipRef}
+            role="tooltip"
+            style={{
+              position: "fixed",
+              left: 0,
+              top: 0,
+              opacity: 0,
+              transform: "scale(0.97)",
+            }}
+            className={`z-[9999] pointer-events-none transition-[opacity,transform] duration-150 bg-[#0b0d12]/98 backdrop-blur-md border border-neutral-700/80 text-neutral-300 rounded-lg shadow-2xl shadow-black/70 ${baseCardStyle}`}
+          >
+            {(title || Icon) && (
+              <div className="flex items-center gap-2 border-b border-neutral-800/80 pb-2 mb-0.5">
+                {Icon && <Icon className={`w-4 h-4 shrink-0 ${iconClassName}`} />}
+                {title && <span className="font-bold text-sm text-neutral-100">{title}</span>}
+              </div>
+            )}
+            <div className={compact ? "" : "text-[11px] leading-relaxed text-left text-neutral-300"}>
+              {content}
+            </div>
+          </div>,
+          document.body
         )}
-        <div className="text-[11px] leading-relaxed text-left text-neutral-400">
-          {content}
-        </div>
-      </div>
     </div>
   );
 };
