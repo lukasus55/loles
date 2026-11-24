@@ -1,88 +1,73 @@
 # LOLES
 
-<p align="center">
-  <a href="#website"><img src="https://img.shields.io/badge/WEBSITE-e04e39?style=for-the-badge" alt="Website" /></a>
-  <a href="#features"><img src="https://img.shields.io/badge/FEATURES-dfb317?style=for-the-badge" alt="Features" /></a>
-  <a href="#technologies"><img src="https://img.shields.io/badge/TECHNOLOGIES-9400d3?style=for-the-badge" alt="Technologies" /></a>
-  <a href="#setup"><img src="https://img.shields.io/badge/SETUP-0082c8?style=for-the-badge" alt="Setup" /></a>
-  <a href="#contributing"><img src="https://img.shields.io/badge/CONTRIBUTING-7fb800?style=for-the-badge" alt="Contributing" /></a>
-</p>
+Personal League of Legends matchup playbook, match history tracker, and botlane analytics dashboard.
 
-## Website
+> For technical architecture, domain conventions, and AI/developer onboarding, see **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** and **[AGENTS.md](AGENTS.md)**.
 
 ## Features
 
-## Technologies
+- **Riot Account Verification & Match Sync** — Link your Riot ID and sync ranked matches with early-game `@15` lane diffs, items, trinkets, summoner spells, runes, and stat shards.
+- **Match History** — View synced games with League-style rich item tooltips, full rune page previews, KDA/CS stats, and lane opponents.
+- **Analytics (`/stats`)** — Filter performance by season, role, and champion combinations.
+- **Matchup Notes** — Track lane priority, markdown matchup strategies, and live win/loss stats per matchup.
+
+## Tech Stack
+
+- **Next.js 16** (App Router, Turbopack) + **React 19** + **TypeScript**
+- **Tailwind CSS v4**
+- **PostgreSQL 15** + **Prisma 7** (`@prisma/adapter-pg`)
+- **NextAuth v4** (Discord, Google, Credentials)
+- **Vitest** (unit tests) + **GitHub Actions CI**
 
 ## Setup
 
-To set up the application locally, you will need to use Docker and Docker Compose. The application uses a PostgreSQL database and a Next.js frontend/backend with Prisma.
-
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-- Node.js (if running the Next.js app outside of Docker)
+- [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/)
+- Node.js 22+ (for local development outside Docker)
+- A [Riot Developer API Key](https://developer.riotgames.com/)
 
-### Running with Docker Compose (Recommended)
+### Running Locally (Recommended for Development)
 
-The easiest way to start the application and the database is using Docker Compose.
-
-1. **Environment Variables**
-   Create a `.env` file in the root directory containing necessary environment variables for Postgres and Prisma. For example:
-   ```env
-   # Ensure you set these correctly based on your database configuration
-   POSTGRES_USER=postgres
-   POSTGRES_PASSWORD=password
-   POSTGRES_DB=loles
-   DATABASE_URL=postgresql://postgres:password@db:5432/loles?schema=public
-   ```
-
-2. **Start the Containers**
-   ```bash
-   docker compose up -d --build
-   ```
-   This command will:
-   - Start a PostgreSQL 15 database on port `5434` on your host.
-   - Build the Next.js application container.
-   - Run `npx prisma db push` to synchronize the database schema before starting the app.
-   - Start the Next.js application on port `3055` on your host.
-
-3. **Access the Application**
-   Once the containers are up, the application will be available at:
-   [http://localhost:3055](http://localhost:3055)
-
-### Running Locally (Without App Container)
-
-If you want to run the Next.js development server locally while using Docker only for the database:
-
-1. **Start the Database**
+1. **Start PostgreSQL via Docker**
    ```bash
    docker compose up db -d
    ```
-   *Note: This maps the database to port `5434` locally.*
+   *Maps PostgreSQL 15 to host port `5434`.*
 
-2. **Configure Environment Variables**
-   Update your local `.env` file to connect to the database via localhost on the mapped port:
+2. **Configure `.env`**
+   Create a `.env` file in the root directory (see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#5-environment-variables) for all variables):
    ```env
    DATABASE_URL=postgresql://postgres:password@localhost:5434/loles?schema=public
+   NEXTAUTH_URL=http://localhost:3000
+   NEXTAUTH_SECRET=your-random-secret
+   RIOT_API_KEY=RGAPI-your-key
    ```
 
-3. **Install Dependencies**
+3. **Install Dependencies & Sync Database**
    ```bash
    npm install
-   ```
-
-4. **Synchronize Prisma Schema & Generate Client**
-   ```bash
-   npx prisma db push
    npx prisma generate
+   npx prisma db push
    ```
 
-5. **Start the Development Server**
+4. **Start Dev Server**
    ```bash
    npm run dev
    ```
-   The local application will be available at [http://localhost:3000](http://localhost:3000).
+   Open [http://localhost:3000](http://localhost:3000).
 
-## Contributing
+### Running with Full Docker Compose
+
+```bash
+docker compose up -d --build
+```
+Starts Postgres (`5434`), pushes the Prisma schema, and exposes the app on [http://localhost:3055](http://localhost:3055).
+
+## Testing & Verification
+
+```bash
+npm test             # Run unit tests (Vitest)
+npm run typecheck    # TypeScript type check
+npm run lint         # ESLint
+```
