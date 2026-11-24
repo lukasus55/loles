@@ -1,110 +1,126 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { FileEdit, Loader2 } from "lucide-react";
 import { LinkAccountPrompt } from "@/components/account/LinkAccountPrompt";
 import { StatsFilters, StatsFilterState } from "./StatsFilters";
-import { StatsTable, StatRowData } from "./StatsTable";
-import { useRouter } from "next/navigation";
-import { MatchupHeader } from "@/components/notes/editor/MatchupHeader";
+import { StatsTable } from "./StatsTable";
 import { EnemyChampionsTable } from "./EnemyChampionsTable";
 import { GeneralInfo } from "./GeneralInfo";
-import { ChampionData } from "@/lib/riot/ddragon";
-import { FileEdit, Loader2 } from "lucide-react";
+import { MatchupHeader } from "@/components/notes/editor/MatchupHeader";
+import { Role } from "@/components/notes/RoleFilter";
+import { ChampionData } from "@/lib/riot/assets";
 import { Button } from "@/components/ui/Button";
+import {
+  StatsGroupBy,
+  StatsMatchRecord,
+  aggregateByPerspective,
+  buildTableTitle,
+  computeSummaryStats,
+  filterMatches,
+  getAvailablePerspectives,
+  isBotLaneRole,
+  resolveActivePerspective,
+} from "@/lib/stats/analytics";
 
-export const StatsClient = ({ matches, champions, riotAccount }: { matches: any[], champions: ChampionData[], riotAccount: any }) => {
+interface StatsClientProps {
+  matches: StatsMatchRecord[];
+  champions: ChampionData[];
+  riotAccount: {
+    id: string;
+    gameName: string;
+    tagLine: string;
+    region: string;
+  } | null;
+  preferredRole?: Role | null;
+}
+
+export const StatsClient: React.FC<StatsClientProps> = ({
+  matches,
+  champions,
+  riotAccount,
+  preferredRole = null,
+}) => {
   const router = useRouter();
   const [isOpeningNote, setIsOpeningNote] = useState(false);
 
   const [filters, setFilters] = useState<StatsFilterState>({
     season: null,
-    role: null,
+    role: preferredRole,
     champions: {
       myPick: null,
       enemyPick: null,
       mySupp: null,
       enemySupp: null,
-    }
+    },
   });
 
-  const isExactMatchup = filters.champions.myPick && filters.champions.enemyPick;
+  const [requestedPerspective, setRequestedPerspective] = useState<StatsGroupBy | null>(null);
 
-  const roleFilteredMatches = useMemo(() => {
-    return matches.filter(m => {
-      if (filters.season && m.season !== filters.season) return false;
-      if (filters.role) {
-        const dbRoleMap: Record<string, string> = { "TOP": "TOP", "JGL": "JUNGLE", "MID": "MIDDLE", "ADC": "BOTTOM", "SUPP": "UTILITY" };
-        if (m.role !== dbRoleMap[filters.role]) return false;
+  const isExactMatchup = Boolean(filters.champions.myPick && filters.champions.enemyPick);
+
+  const filteredMatches = useMemo(
+    () => filterMatches(matches, filters),
+    [matches, filters]
+  );
+
+  const roleOnlyMatches = useMemo(
+    () =>
+      filterMatches(matches, {
+        season: filters.season,
+        role: filters.role,
+        champions: { myPick: null, enemyPick: null, mySupp: null, enemySupp: null },
+      }),
+    [matches, filters.season, filters.role]
+  );
+
+  const availablePerspectives = useMemo(
+    () => getAvailablePerspectives(filters.role, filters.champions),
+    [filters.role, filters.champions]
+  );
+
+  const activePerspective = useMemo(
+    () => resolveActivePerspective(requestedPerspective, availablePerspectives),
+    [requestedPerspective, availablePerspectives]
+  );
+
+  const activePerspectiveMeta = useMemo(
+    () => availablePerspectives.find((p) => p.id === activePerspective) ?? null,
+    [availablePerspectives, activePerspective]
+  );
+
+  const tableData = useMemo(() => {
+    if (!activePerspective) return [];
+    return aggregateByPerspective(filteredMatches, activePerspective);
+  }, [filteredMatches, activePerspective]);
+
+  const tableTitle = useMemo(() => {
+    if (!activePerspective) return "";
+    return buildTableTitle(activePerspective, filters.role, filters.champions);
+  }, [activePerspective, filters.role, filters.champions]);
+
+  const summaryStats = useMemo(
+    () => computeSummaryStats(filteredMatches),
+    [filteredMatches]
+  );
+
+  const enemyTableData = useMemo(() => {
+    const dataMap: Record<string, { championName: string; played: number; wins: number }> = {};
+    for (const m of roleOnlyMatches) {
+      if (!m.enemyChampionName) continue;
+      if (!dataMap[m.enemyChampionName]) {
+        dataMap[m.enemyChampionName] = {
+          championName: m.enemyChampionName,
+          played: 0,
+          wins: 0,
+        };
       }
-      return true;
-    });
-  }, [matches, filters.season, filters.role]);
-
-  const filteredMatches = useMemo(() => {
-    return roleFilteredMatches.filter(m => {
-      if (filters.champions.mySupp && m.partnerChampionName !== filters.champions.mySupp) return false;
-      if (filters.champions.enemySupp && m.enemyPartnerChampionName !== filters.champions.enemySupp) return false;
-      return true;
-    });
-  }, [roleFilteredMatches, filters.champions.mySupp, filters.champions.enemySupp]);
-
-  const { tableData, tableTitle } = useMemo(() => {
-    const dataMap: Record<string, StatRowData> = {};
-
-    if (!filters.champions.myPick && !filters.champions.enemyPick) {
-      // Focus: Your Champions
-      filteredMatches.forEach(m => {
-        if (!m.championName) return;
-        if (!dataMap[m.championName]) {
-          dataMap[m.championName] = { championName: m.championName, played: 0, wins: 0, kills: 0, deaths: 0, assists: 0, cs: 0, gameDuration: 0 };
-        }
-        dataMap[m.championName].played++;
-        if (m.win) dataMap[m.championName].wins++;
-        dataMap[m.championName].kills += m.kills || 0;
-        dataMap[m.championName].deaths += m.deaths || 0;
-        dataMap[m.championName].assists += m.assists || 0;
-        dataMap[m.championName].cs += m.cs || 0;
-        dataMap[m.championName].gameDuration += m.gameDuration || 0;
-      });
-      return { tableData: Object.values(dataMap), tableTitle: "Your Champions" };
-
-    } else if (filters.champions.myPick && !filters.champions.enemyPick) {
-      // Focus: Matchups FOR your pick (Group by enemy)
-      filteredMatches.forEach(m => {
-        if (m.championName !== filters.champions.myPick || !m.enemyChampionName) return;
-        if (!dataMap[m.enemyChampionName]) {
-          dataMap[m.enemyChampionName] = { championName: m.enemyChampionName, played: 0, wins: 0, kills: 0, deaths: 0, assists: 0, cs: 0, gameDuration: 0 };
-        }
-        dataMap[m.enemyChampionName].played++;
-        if (m.win) dataMap[m.enemyChampionName].wins++;
-        dataMap[m.enemyChampionName].kills += m.kills || 0;
-        dataMap[m.enemyChampionName].deaths += m.deaths || 0;
-        dataMap[m.enemyChampionName].assists += m.assists || 0;
-        dataMap[m.enemyChampionName].cs += m.cs || 0;
-        dataMap[m.enemyChampionName].gameDuration += m.gameDuration || 0;
-      });
-      return { tableData: Object.values(dataMap), tableTitle: `Matchups playing as ${filters.champions.myPick}` };
-
-    } else if (!filters.champions.myPick && filters.champions.enemyPick) {
-      // Focus: Your Champions VS enemy pick (Group by my pick)
-      filteredMatches.forEach(m => {
-        if (m.enemyChampionName !== filters.champions.enemyPick || !m.championName) return;
-        if (!dataMap[m.championName]) {
-          dataMap[m.championName] = { championName: m.championName, played: 0, wins: 0, kills: 0, deaths: 0, assists: 0, cs: 0, gameDuration: 0 };
-        }
-        dataMap[m.championName].played++;
-        if (m.win) dataMap[m.championName].wins++;
-        dataMap[m.championName].kills += m.kills || 0;
-        dataMap[m.championName].deaths += m.deaths || 0;
-        dataMap[m.championName].assists += m.assists || 0;
-        dataMap[m.championName].cs += m.cs || 0;
-        dataMap[m.championName].gameDuration += m.gameDuration || 0;
-      });
-      return { tableData: Object.values(dataMap), tableTitle: `Your Champions vs ${filters.champions.enemyPick}` };
+      dataMap[m.enemyChampionName].played++;
+      if (m.win) dataMap[m.enemyChampionName].wins++;
     }
-
-    return { tableData: [], tableTitle: "" };
-  }, [filteredMatches, filters.champions.myPick, filters.champions.enemyPick]);
+    return Object.values(dataMap);
+  }, [roleOnlyMatches]);
 
   if (!riotAccount) {
     return (
@@ -115,50 +131,51 @@ export const StatsClient = ({ matches, champions, riotAccount }: { matches: any[
   }
 
   const handleRowClick = (championName: string) => {
-    if (!filters.champions.myPick && !filters.champions.enemyPick) {
-      setFilters({ ...filters, champions: { ...filters.champions, myPick: championName } });
-    } else if (filters.champions.myPick && !filters.champions.enemyPick) {
-      setFilters({ ...filters, champions: { ...filters.champions, enemyPick: championName } });
-    } else if (!filters.champions.myPick && filters.champions.enemyPick) {
-      setFilters({ ...filters, champions: { ...filters.champions, myPick: championName } });
-    }
+    if (!activePerspective) return;
+    setFilters((prev) => ({
+      ...prev,
+      champions: {
+        ...prev.champions,
+        [activePerspective]: championName,
+      },
+    }));
   };
 
-  const calculateTotalWinsLosses = () => {
-    if (!isExactMatchup) return { wins: 0, losses: 0 };
-    let w = 0, l = 0;
-    filteredMatches.forEach(m => {
-      if (m.championName === filters.champions.myPick && m.enemyChampionName === filters.champions.enemyPick) {
-        if (m.win) w++; else l++;
-      }
-    });
-    return { wins: w, losses: l };
+  const handleEnemyQuickPick = (championName: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      champions: {
+        ...prev.champions,
+        enemyPick: championName,
+      },
+    }));
   };
 
   const handleOpenNote = async () => {
     if (!filters.role || !filters.champions.myPick || !filters.champions.enemyPick) return;
     setIsOpeningNote(true);
     try {
+      const payload: Record<string, string> = {
+        role: filters.role,
+        myPick: filters.champions.myPick,
+        enemyPick: filters.champions.enemyPick,
+      };
+      if (isBotLaneRole(filters.role)) {
+        if (filters.champions.mySupp) payload.mySupp = filters.champions.mySupp;
+        if (filters.champions.enemySupp) payload.enemySupp = filters.champions.enemySupp;
+      }
+
       const res = await fetch("/api/notes/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          role: filters.role,
-          myPick: filters.champions.myPick,
-          enemyPick: filters.champions.enemyPick,
-        })
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
         const data = await res.json();
         if (data.exists) {
           router.push(`/note/${data.noteId}/edit?from=stats`);
         } else {
-          const params = new URLSearchParams({
-            role: filters.role,
-            myPick: filters.champions.myPick,
-            enemyPick: filters.champions.enemyPick,
-            from: "stats",
-          });
+          const params = new URLSearchParams({ ...payload, from: "stats" });
           router.push(`/note/new?${params.toString()}`);
         }
       }
@@ -169,71 +186,112 @@ export const StatsClient = ({ matches, champions, riotAccount }: { matches: any[
     }
   };
 
-  const enemyTableData = useMemo(() => {
-    const dataMap: Record<string, { championName: string, played: number, wins: number }> = {};
-    roleFilteredMatches.forEach(m => {
-      if (!m.enemyChampionName) return;
-      if (!dataMap[m.enemyChampionName]) {
-        dataMap[m.enemyChampionName] = { championName: m.enemyChampionName, played: 0, wins: 0 };
-      }
-      dataMap[m.enemyChampionName].played++;
-      if (m.win) dataMap[m.enemyChampionName].wins++;
-    });
-    return Object.values(dataMap);
-  }, [roleFilteredMatches]);
+  const enemySidebarTitle =
+    filters.role === "ADC"
+      ? "Most Faced Enemy ADCs"
+      : filters.role === "SUPP"
+      ? "Most Faced Enemy Supports"
+      : "Most Faced Opponents";
 
   return (
     <div className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full animate-in fade-in duration-500 space-y-8">
-      <div className="flex flex-col gap-2 mb-4">
+      <div className="flex flex-col gap-1.5">
         <h1 className="text-3xl font-bold text-white tracking-tight">Your Analytics</h1>
-        <p className="text-neutral-400">Total tracked matches: <strong>{matches.length}</strong></p>
+        <p className="text-neutral-400 text-sm">
+          Total tracked matches: <strong className="text-neutral-200">{matches.length}</strong>
+          {filteredMatches.length !== matches.length && (
+            <span className="ml-2 text-neutral-500">
+              • Matching current filters:{" "}
+              <strong className="text-neutral-300">{filteredMatches.length}</strong>
+            </span>
+          )}
+        </p>
       </div>
 
       <StatsFilters filters={filters} onChange={setFilters} championsData={champions} />
 
-      <div className="mt-8 h-[520px]">
-        {isExactMatchup ? (
-          <div className="max-w-4xl mx-auto h-full flex flex-col justify-center items-center">
-            <div className="w-full">
-              <MatchupHeader
-                filters={filters.champions}
-                role={filters.role}
-                champions={champions}
-                initialData={calculateTotalWinsLosses()}
-              />
-            </div>
-            <div className="mt-12">
+      {/* Main Analytics Stage: Exact Matchup Preview + Optional Botlane Partner Breakdown OR Multi-Perspective Table */}
+      {isExactMatchup ? (
+        <div className="space-y-6">
+          <div className="max-w-4xl mx-auto space-y-5">
+            <MatchupHeader
+              filters={filters.champions}
+              role={filters.role}
+              champions={champions}
+              initialData={{ wins: summaryStats.wins, losses: summaryStats.losses }}
+            />
+            <div className="flex flex-col items-center">
               <Button
                 onClick={handleOpenNote}
                 disabled={isOpeningNote || !filters.role}
                 variant="primary"
                 size="lg"
-                className="group w-full max-w-sm mx-auto flex items-center justify-center gap-2"
+                className="w-full max-w-sm flex items-center justify-center gap-2 disabled:cursor-not-allowed"
               >
-                {isOpeningNote ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileEdit className="w-4 h-4" />}
+                {isOpeningNote ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FileEdit className="w-4 h-4" />
+                )}
                 {isOpeningNote ? "Opening..." : "Open Note for this Matchup"}
               </Button>
               {!filters.role && (
-                <p className="text-xs text-neutral-500 text-center mt-3 font-medium">Select a role to open note</p>
+                <p className="text-xs text-neutral-500 text-center mt-2 font-medium">
+                  Select a role to open note
+                </p>
               )}
             </div>
           </div>
-        ) : (
+
+          {/* Botlane partner breakdown directly under 1v1 Matchup Preview */}
+          {activePerspective && (
+            <div className="h-[420px]">
+              <StatsTable
+                data={tableData}
+                championsData={champions}
+                title={tableTitle}
+                columnLabel={activePerspectiveMeta?.columnLabel}
+                perspectives={availablePerspectives}
+                activePerspective={activePerspective}
+                onPerspectiveChange={setRequestedPerspective}
+                onRowClick={handleRowClick}
+              />
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="h-[520px]">
           <StatsTable
             data={tableData}
             championsData={champions}
             title={tableTitle}
+            columnLabel={activePerspectiveMeta?.columnLabel}
+            perspectives={availablePerspectives}
+            activePerspective={activePerspective}
+            onPerspectiveChange={setRequestedPerspective}
             onRowClick={handleRowClick}
           />
-        )}
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="lg:w-[70%] shrink-0 h-[400px]">
-          <GeneralInfo />
         </div>
-        <div className="flex-1 h-[400px]">
-          <EnemyChampionsTable data={enemyTableData} championsData={champions} />
+      )}
+
+      {/* Bottom Summary & Most Faced Opponents */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="lg:w-[68%] shrink-0 min-h-[340px]">
+          <GeneralInfo
+            summary={summaryStats}
+            tableData={tableData}
+            championsData={champions}
+            perspectiveLabel={activePerspectiveMeta?.columnLabel}
+            onHighlightClick={activePerspective ? handleRowClick : undefined}
+          />
+        </div>
+        <div className="flex-1 min-h-[340px]">
+          <EnemyChampionsTable
+            data={enemyTableData}
+            championsData={champions}
+            title={enemySidebarTitle}
+            onRowClick={handleEnemyQuickPick}
+          />
         </div>
       </div>
     </div>
