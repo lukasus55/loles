@@ -25,22 +25,27 @@ src/
     api/                   # Backend Route Handlers (route.ts -> GET/POST/PUT/DELETE)
       auth/                # NextAuth + register
       account/             # Profile preferences, name/password, Riot unlink
-      notes/               # Matchup notes CRUD, collision check, matchup stats
+      matchup/             # Matchup Hub upsert/delete & loadouts (runes/builds presets)
+      notes/               # Legacy matchup notes list, collision check, matchup stats
       riot/                # Verify, refresh, matches list, sync (init/process/backfill)
       stats/               # Aggregated stats endpoint
     history/               # Match History page
-    notes/ & note/         # Matchup notes dashboard & editor (migrating to Matchup Hub in v1.1)
-    stats/                 # Analytics & matchup exploration page
+    matchups/              # Matchups Playbook (legacy /notes redirects here)
+    matchup/               # Unified Matchup Hub (/matchup?role=...&my=...&enemy=...)
+    stats/                 # Multi-perspective Analytics & Botlane Draft Helper
   components/
     ui/                    # Shared UI primitives (Button, ConfirmDialog, Dropdown, Input, Tooltip, Spinner, ToastProvider, ChampionSelect)
     match/                 # Reusable match display components (MatchLoadoutDisplay, RiotItemTooltip)
+    matchup/               # MatchupHubClient, MatchupStrategyTab, MatchupHistoryTab, loadouts/ (RunePicker, BuildPicker, ItemPickerModal)
     history/               # HistoryClient, MatchCard
-    notes/                 # DashboardClient, MatchupNoteForm, MatchupHeader, RoleFilter, ChampionFilterBlock
-    stats/                 # StatsClient, StatsFilters, StatsTable, EnemyChampionsTable
+    notes/                 # DashboardClient (Playbook), MatchupHeader, RoleFilter, ChampionFilterBlock
+    stats/                 # StatsClient, StatsFilters, StatsTable, GeneralInfo, EnemyChampionsTable
     layout/                # Navbar, MobileNav, UserNav, Footer
   lib/
     prisma.ts              # Singleton PrismaClient using PrismaPg adapter
     auth.ts                # NextAuth configuration (authOptions)
+    matchup/               # url.ts (Matchup Hub routing) & loadouts.ts (rune/build pure rules)
+    stats/                 # analytics.ts (multi-perspective botlane filtering & aggregation)
     riot/
       api.ts               # Riot API fetchers & continental routing
       ddragon.ts           # Server-side 24h-cached DDragon fetchers (champions, runes, items, spells)

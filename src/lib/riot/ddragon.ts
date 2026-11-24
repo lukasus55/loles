@@ -4,6 +4,7 @@ import {
   ItemSummary,
   MatchAssetsData,
   RuneTreeData,
+  ShopItemData,
   SummonerSpellData,
   stripDDragonHtml,
 } from "./assets";
@@ -14,6 +15,7 @@ export type {
   ItemSummary,
   MatchAssetsData,
   RuneTreeData,
+  ShopItemData,
   SummonerSpellData,
 };
 
@@ -249,4 +251,33 @@ export async function getMatchAssets(): Promise<MatchAssetsData> {
     items,
     summonerSpells,
   };
+}
+
+/**
+ * Purchasable Summoner's Rift items sorted for the interactive Build Picker.
+ * Deduplicates identical name+gold entries (e.g. Ornn masterwork or mode duplicates).
+ */
+export async function getShopItems(): Promise<ShopItemData[]> {
+  const srItems = await getItems({ srOnly: true });
+  const seen = new Set<string>();
+  const list: ShopItemData[] = [];
+
+  for (const item of Object.values(srItems)) {
+    if (!item.name || item.gold <= 0) continue;
+    const dedupKey = `${item.name.toLowerCase()}::${item.gold}`;
+    if (seen.has(dedupKey)) continue;
+    seen.add(dedupKey);
+
+    list.push({
+      id: item.id,
+      name: item.name,
+      plaintext: item.plaintext,
+      description: item.description,
+      iconUrl: item.iconUrl,
+      gold: item.gold,
+      tags: item.tags,
+    });
+  }
+
+  return list.sort((a, b) => b.gold - a.gold || a.name.localeCompare(b.name));
 }

@@ -8,7 +8,7 @@ import { MatchItemsRow, MatchSpellsAndRunes } from "@/components/match/MatchLoad
 import { MatchRecordDTO } from "@/components/history/MatchCard";
 import { Button } from "@/components/ui/Button";
 import { Tooltip } from "@/components/ui/Tooltip";
-import { History } from "lucide-react";
+import { BookmarkPlus, History } from "lucide-react";
 
 interface MatchupHistoryTabProps {
   exactMatches: MatchRecordDTO[];
@@ -18,6 +18,7 @@ interface MatchupHistoryTabProps {
   enemyPick: string;
   champions: ChampionData[];
   matchAssets: MatchAssetsData;
+  onSaveAsPreset?: (match: MatchRecordDTO) => void;
 }
 
 function formatShortDate(dateStr: string | Date): string {
@@ -33,6 +34,7 @@ export const MatchupHistoryTab: React.FC<MatchupHistoryTabProps> = ({
   enemyPick,
   champions,
   matchAssets,
+  onSaveAsPreset,
 }) => {
   const [scope, setScope] = useState<"exact" | "broad">(
     hasPartnerFilter && exactMatches.length > 0 ? "exact" : "broad"
@@ -255,6 +257,31 @@ export const MatchupHistoryTab: React.FC<MatchupHistoryTabProps> = ({
                     )}
                   </div>
                 )}
+
+                {/* One-click Copy Runes & Build to Preset */}
+                {onSaveAsPreset &&
+                  (match.loadoutSynced ||
+                    (match.items?.length ?? 0) > 0 ||
+                    Boolean(match.primaryRuneStyle)) && (
+                    <div className="ml-auto xl:ml-0 shrink-0">
+                      <Tooltip
+                        compact
+                        content="Copy runes & build from this game into a new preset"
+                        position="top"
+                      >
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onSaveAsPreset(match)}
+                          className="h-8 px-2.5 text-xs gap-1.5 text-neutral-400 hover:text-white border border-neutral-800/80 hover:border-neutral-700"
+                        >
+                          <BookmarkPlus className="w-3.5 h-3.5 text-red-400" />
+                          <span className="hidden sm:inline">Preset</span>
+                        </Button>
+                      </Tooltip>
+                    </div>
+                  )}
               </div>
             );
           })}

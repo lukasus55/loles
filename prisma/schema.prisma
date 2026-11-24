@@ -70,16 +70,77 @@ model MatchupNote {
   enemyChampion  String
   mySupport      String?  // Optional for bot lane
   enemySupport   String?  // Optional for bot lane
-  prio           String?  // e.g., "My", "Enemy", "50/50"
+  prio           String?  // e.g., "Yes", "50/50", "No", "N/A"
   wins           Int      @default(0)
   losses         Int      @default(0)
   notes          String?  @db.Text
+  detachLoadouts Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  runePresets    MatchupRunePreset[]
+  buildPresets   MatchupBuildPreset[]
+  setups         MatchupSetup[]
 
   @@map("matchup_notes")
+}
+
+model MatchupRunePreset {
+  id               String   @id @default(cuid())
+  matchupNoteId    String
+  name             String
+  primaryRuneStyle Int?
+  subRuneStyle     Int?
+  primaryRunes     Int[]    @default([])
+  subRunes         Int[]    @default([])
+  statShards       Int[]    @default([])
+  order            Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  matchupNote MatchupNote    @relation(fields: [matchupNoteId], references: [id], onDelete: Cascade)
+  setups      MatchupSetup[]
+
+  @@index([matchupNoteId])
+  @@map("matchup_rune_presets")
+}
+
+model MatchupBuildPreset {
+  id            String   @id @default(cuid())
+  matchupNoteId String
+  name          String
+  starterItems  Int[]    @default([])
+  coreItems     Int[]    @default([])
+  situational   Int[]    @default([])
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  matchupNote MatchupNote    @relation(fields: [matchupNoteId], references: [id], onDelete: Cascade)
+  setups      MatchupSetup[]
+
+  @@index([matchupNoteId])
+  @@map("matchup_build_presets")
+}
+
+model MatchupSetup {
+  id            String   @id @default(cuid())
+  matchupNoteId String
+  name          String
+  note          String?
+  runePresetId  String?
+  buildPresetId String?
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  matchupNote MatchupNote         @relation(fields: [matchupNoteId], references: [id], onDelete: Cascade)
+  runePreset  MatchupRunePreset?  @relation(fields: [runePresetId], references: [id], onDelete: SetNull)
+  buildPreset MatchupBuildPreset? @relation(fields: [buildPresetId], references: [id], onDelete: SetNull)
+
+  @@index([matchupNoteId])
+  @@map("matchup_setups")
 }
 
 model RiotAccount {

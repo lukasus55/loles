@@ -17,12 +17,19 @@ import { ChampionFilterBlock, MatchupFilters } from "@/components/notes/Champion
 import { MatchupHeader } from "@/components/notes/editor/MatchupHeader";
 import { MatchupStrategyTab } from "./MatchupStrategyTab";
 import { MatchupHistoryTab } from "./MatchupHistoryTab";
-import { ChampionData, MatchAssetsData } from "@/lib/riot/assets";
+import { ChampionData, MatchAssetsData, ShopItemData } from "@/lib/riot/assets";
 import { MatchRecordDTO } from "@/components/history/MatchCard";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/ToastProvider";
+import {
+  BuildPresetDTO,
+  RunePresetDTO,
+  SetupPresetDTO,
+  buildLoadoutFromMatch,
+} from "@/lib/matchup/loadouts";
+import { ImportedLoadoutDraft } from "./loadouts/MatchupLoadoutsSection";
 import {
   MatchupOrigin,
   MatchupTab,
@@ -35,6 +42,10 @@ interface SavedNoteData {
   id: string;
   prio: string | null;
   notes: string | null;
+  detachLoadouts: boolean;
+  setups: SetupPresetDTO[];
+  runePresets: RunePresetDTO[];
+  buildPresets: BuildPresetDTO[];
 }
 
 interface MatchupHubClientProps {
@@ -51,6 +62,7 @@ interface MatchupHubClientProps {
   broadMatches: MatchRecordDTO[];
   champions: ChampionData[];
   matchAssets: MatchAssetsData;
+  shopItems: ShopItemData[];
 }
 
 export const MatchupHubClient: React.FC<MatchupHubClientProps> = ({
@@ -67,6 +79,7 @@ export const MatchupHubClient: React.FC<MatchupHubClientProps> = ({
   broadMatches,
   champions,
   matchAssets,
+  shopItems,
 }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -75,6 +88,7 @@ export const MatchupHubClient: React.FC<MatchupHubClientProps> = ({
   const [noteId, setNoteId] = useState<string | null>(initialNote?.id ?? null);
   const [prio, setPrio] = useState<string>(initialNote?.prio || "N/A");
   const [notes, setNotes] = useState<string>(initialNote?.notes || "");
+  const [importedDraft, setImportedDraft] = useState<ImportedLoadoutDraft | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -209,6 +223,20 @@ export const MatchupHubClient: React.FC<MatchupHubClientProps> = ({
     { role, myPick, enemyPick },
     { from, tab: activeTab }
   );
+
+  const handleSaveMatchAsPreset = (match: MatchRecordDTO) => {
+    const draft = buildLoadoutFromMatch(match);
+    setImportedDraft({
+      id: Date.now(),
+      ...draft,
+    });
+    setActiveTab("strategy");
+    toast({
+      type: "info",
+      title: "Loaded from Match",
+      message: "Runes & build copied into editor — name it (e.g. With Prio) and click Save!",
+    });
+  };
 
   const matchCountBadge = hasPartnerFilter ? exactMatches.length : broadMatches.length;
 
@@ -397,10 +425,19 @@ export const MatchupHubClient: React.FC<MatchupHubClientProps> = ({
       {/* Active Tab Content */}
       {activeTab === "strategy" ? (
         <MatchupStrategyTab
+          matchup={{ role, myPick, enemyPick, mySupp, enemySupp }}
           notes={notes}
           prio={prio}
           onNotesChange={setNotes}
           onPrioChange={setPrio}
+          initialDetachLoadouts={initialNote?.detachLoadouts ?? false}
+          initialSetups={initialNote?.setups ?? []}
+          initialRunePresets={initialNote?.runePresets ?? []}
+          initialBuildPresets={initialNote?.buildPresets ?? []}
+          importedDraft={importedDraft}
+          matchAssets={matchAssets}
+          shopItems={shopItems}
+          onNoteAutoCreated={(id) => setNoteId(id)}
         />
       ) : (
         <MatchupHistoryTab
@@ -411,6 +448,7 @@ export const MatchupHubClient: React.FC<MatchupHubClientProps> = ({
           enemyPick={enemyPick}
           champions={champions}
           matchAssets={matchAssets}
+          onSaveAsPreset={handleSaveMatchAsPreset}
         />
       )}
 

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { getChampions, getMatchAssets } from "@/lib/riot/ddragon";
+import { getChampions, getMatchAssets, getShopItems } from "@/lib/riot/ddragon";
 import {
   isBotRole,
   mapAppRoleToRiotRole,
@@ -40,44 +40,64 @@ export default async function MatchupPage({
   const hasPartnerFilter = isBot && Boolean(mySupp || enemySupp);
   const riotRole = mapAppRoleToRiotRole(role);
 
-  const [exactNote, generalNote, broadMatches, champions, matchAssets] = await Promise.all([
-    prisma.matchupNote.findFirst({
-      where: {
-        userId: session.user.id,
-        role,
-        myChampion: myPick,
-        enemyChampion: enemyPick,
-        mySupport: isBot ? mySupp : null,
-        enemySupport: isBot ? enemySupp : null,
-      },
-      select: { id: true, prio: true, notes: true },
-    }),
-    hasPartnerFilter
-      ? prisma.matchupNote.findFirst({
-          where: {
-            userId: session.user.id,
-            role,
-            myChampion: myPick,
-            enemyChampion: enemyPick,
-            mySupport: null,
-            enemySupport: null,
+  const [exactNote, generalNote, broadMatches, champions, matchAssets, shopItems] =
+    await Promise.all([
+      prisma.matchupNote.findFirst({
+        where: {
+          userId: session.user.id,
+          role,
+          myChampion: myPick,
+          enemyChampion: enemyPick,
+          mySupport: isBot ? mySupp : null,
+          enemySupport: isBot ? enemySupp : null,
+        },
+        select: {
+          id: true,
+          prio: true,
+          notes: true,
+          detachLoadouts: true,
+          setups: {
+            orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+            include: {
+              runePreset: true,
+              buildPreset: true,
+            },
           },
-          select: { id: true },
-        })
-      : Promise.resolve(null),
-    prisma.match.findMany({
-      where: {
-        userId: session.user.id,
-        role: riotRole,
-        championName: myPick,
-        enemyChampionName: enemyPick,
-        gameDuration: { gte: 240 },
-      },
-      orderBy: { gameCreation: "desc" },
-    }),
-    getChampions(),
-    getMatchAssets(),
-  ]);
+          runePresets: {
+            orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+          },
+          buildPresets: {
+            orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+          },
+        },
+      }),
+      hasPartnerFilter
+        ? prisma.matchupNote.findFirst({
+            where: {
+              userId: session.user.id,
+              role,
+              myChampion: myPick,
+              enemyChampion: enemyPick,
+              mySupport: null,
+              enemySupport: null,
+            },
+            select: { id: true },
+          })
+        : Promise.resolve(null),
+      prisma.match.findMany({
+        where: {
+          userId: session.user.id,
+          role: riotRole,
+          championName: myPick,
+          enemyChampionName: enemyPick,
+          gameDuration: { gte: 240 },
+        },
+        orderBy: { gameCreation: "desc" },
+      }),
+      getChampions(),
+      getMatchAssets(),
+      getShopItems(),
+    ]);
 
   const exactMatches = hasPartnerFilter
     ? broadMatches.filter((m) => {
@@ -104,6 +124,7 @@ export default async function MatchupPage({
         broadMatches={broadMatches}
         champions={champions}
         matchAssets={matchAssets}
+        shopItems={shopItems}
       />
     </div>
   );

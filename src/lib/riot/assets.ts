@@ -54,6 +54,10 @@ export interface ItemSummary {
   gold: number;
 }
 
+export interface ShopItemData extends ItemSummary {
+  tags: string[];
+}
+
 export interface SummonerSpellData {
   id: number;
   key: string;
