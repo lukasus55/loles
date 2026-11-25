@@ -57,7 +57,7 @@ export const Dropdown: React.FC<DropdownProps> = ({ options, value, onChange, pl
                 }}
                 className={`w-full text-left px-3 py-2 text-sm transition-colors cursor-pointer ${
                   value === option.value
-                    ? "bg-red-950/40 text-white font-medium"
+                    ? "bg-accent/15 text-white font-medium"
                     : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
                 }`}
               >

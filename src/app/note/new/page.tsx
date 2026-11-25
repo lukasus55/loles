@@ -1,36 +1,28 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getChampions } from "@/lib/riot/ddragon";
-import prisma from "@/lib/prisma";
-import { MatchupNoteForm } from "@/components/notes/MatchupNoteForm";
+import { buildMatchupUrl, parseMatchupSearchParams } from "@/lib/matchup/url";
 
-export default async function NewNotePage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const session = await getServerSession(authOptions);
+export default async function LegacyNewNoteRedirectPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolved = await searchParams;
+  const parsed = parseMatchupSearchParams(resolved);
 
-  if (!session?.user) {
-    redirect("/login");
+  if (parsed) {
+    redirect(
+      buildMatchupUrl(
+        {
+          role: parsed.role,
+          myPick: parsed.myPick,
+          enemyPick: parsed.enemyPick,
+          mySupp: parsed.mySupp,
+          enemySupp: parsed.enemySupp,
+        },
+        { from: parsed.from, tab: parsed.tab }
+      )
+    );
   }
-  const dbUser = await prisma.user.findUnique({ where: { id: session.user.id }, select: { primaryRole: true } });
-  const preferredRole = dbUser?.primaryRole || undefined;
 
-  const champions = await getChampions();
-  const resolvedParams = await searchParams;
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <MatchupNoteForm 
-        mode="create" 
-        champions={champions} 
-        from={typeof resolvedParams.from === 'string' ? resolvedParams.from : undefined}
-        initialFilters={{
-          role: (typeof resolvedParams.role === 'string' ? resolvedParams.role : preferredRole) as any,
-          myPick: typeof resolvedParams.myPick === 'string' ? resolvedParams.myPick : null,
-          enemyPick: typeof resolvedParams.enemyPick === 'string' ? resolvedParams.enemyPick : null,
-          mySupp: typeof resolvedParams.mySupp === 'string' ? resolvedParams.mySupp : null,
-          enemySupp: typeof resolvedParams.enemySupp === 'string' ? resolvedParams.enemySupp : null,
-        }}
-      />
-    </div>
-  );
+  redirect("/matchups");
 }

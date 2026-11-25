@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 export type Role = "TOP" | "JGL" | "MID" | "ADC" | "SUPP";
 
@@ -18,35 +19,49 @@ const ROLES: { id: Role; label: string; icon: string }[] = [
   { id: "SUPP", label: "Support", icon: "/roles/supp.webp" },
 ];
 
-export const RoleFilter: React.FC<RoleFilterProps> = ({ selectedRole, onChange, allowClear = false }) => {
+export const RoleFilter: React.FC<RoleFilterProps> = ({
+  selectedRole,
+  onChange,
+  allowClear = false,
+}) => {
   return (
-    <div className="flex items-center space-x-2 bg-neutral-900 border border-neutral-800 p-2 rounded-xl w-fit shadow-sm">
-      {ROLES.map((role) => (
-        <button
-          key={role.id}
-          onClick={() => {
-            if (allowClear && selectedRole === role.id) {
-              onChange(null);
-            } else {
-              onChange(role.id);
-            }
-          }}
-          title={role.label}
-          className={`relative p-3 rounded-lg transition-all duration-200 cursor-pointer group ${selectedRole === role.id
-              ? "bg-red-950/40 border border-red-900/50"
-              : "hover:bg-neutral-800 border border-transparent"
-            }`}
-        >
-          {/* Icons should be placed in public/roles/ */}
-          <div className={`w-6 h-6 relative transition-opacity duration-200 ${selectedRole === role.id ? "opacity-100" : "opacity-50 group-hover:opacity-100"}`}>
-            <Image src={role.icon} alt={role.label} fill className="object-contain" />
-          </div>
+    <div className="inline-flex items-center gap-1 bg-neutral-900/60 border border-neutral-800/80 p-1 rounded-lg w-fit">
+      {ROLES.map((role) => {
+        const isSelected = selectedRole === role.id;
+        return (
+          <Tooltip key={role.id} compact content={role.label} position="top">
+            <button
+              type="button"
+              aria-label={role.label}
+              aria-pressed={isSelected}
+              onClick={() => {
+                if (allowClear && isSelected) {
+                  onChange(null);
+                } else {
+                  onChange(role.id);
+                }
+              }}
+              className={`relative p-2 rounded-md transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70 ${
+                isSelected
+                  ? "bg-accent/15 border border-accent/40"
+                  : "hover:bg-neutral-800/70 border border-transparent"
+              }`}
+            >
+              <div
+                className={`w-5 h-5 relative transition-opacity ${
+                  isSelected ? "opacity-100" : "opacity-50 group-hover:opacity-95"
+                }`}
+              >
+                <Image src={role.icon} alt={role.label} fill className="object-contain" />
+              </div>
 
-          {selectedRole === role.id && (
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-1 bg-red-500 rounded-t-full shadow-[0_0_10px_rgba(239,68,68,0.8)] animate-in fade-in zoom-in duration-200"></div>
-          )}
-        </button>
-      ))}
+              {isSelected && (
+                <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-accent rounded-full" />
+              )}
+            </button>
+          </Tooltip>
+        );
+      })}
     </div>
   );
 };

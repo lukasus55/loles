@@ -1,51 +1,72 @@
-import React from 'react';
+import React from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { StatsClient } from "@/components/stats/StatsClient";
 import prisma from "@/lib/prisma";
 import { getChampions } from "@/lib/riot/ddragon";
-
 import { Metadata } from "next";
+import { Role } from "@/components/notes/RoleFilter";
 
 export const metadata: Metadata = {
-  title: 'Analytics',
+  title: "Analytics",
 };
 
 export default async function StatsPage() {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user) {
     redirect("/login");
   }
 
-  const riotAccount = await prisma.riotAccount.findUnique({
-    where: { userId: session.user.id }
-  });
+  const [dbUser, riotAccount, matches, champions] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { primaryRole: true },
+    }),
+    prisma.riotAccount.findUnique({
+      where: { userId: session.user.id },
+      select: {
+        id: true,
+        gameName: true,
+        tagLine: true,
+        region: true,
+      },
+    }),
+    prisma.match.findMany({
+      where: {
+        userId: session.user.id,
+        gameDuration: { gte: 240 }, // Filter out remakes
+      },
+      select: {
+        id: true,
+        season: true,
+        role: true,
+        championName: true,
+        enemyChampionName: true,
+        partnerChampionName: true,
+        enemyPartnerChampionName: true,
+        win: true,
+        kills: true,
+        deaths: true,
+        assists: true,
+        cs: true,
+        gameDuration: true,
+        csAt15: true,
+        enemyCsAt15: true,
+        goldAt15: true,
+        enemyGoldAt15: true,
+      },
+    }),
+    getChampions(),
+  ]);
 
-  const matches = await prisma.match.findMany({
-    where: { 
-      userId: session.user.id,
-      gameDuration: { gte: 240 } // Filter out remakes
-    },
-    select: {
-      id: true,
-      season: true,
-      role: true,
-      championName: true,
-      enemyChampionName: true,
-      partnerChampionName: true,
-      enemyPartnerChampionName: true,
-      win: true,
-      kills: true,
-      deaths: true,
-      assists: true,
-      cs: true,
-      gameDuration: true,
-    }
-  });
-
-  const champions = await getChampions();
-
-  return <StatsClient matches={matches} champions={champions} riotAccount={riotAccount} />;
+  return (
+    <StatsClient
+      matches={matches}
+      champions={champions}
+      riotAccount={riotAccount}
+      preferredRole={(dbUser?.primaryRole as Role | null) ?? null}
+    />
+  );
 }
