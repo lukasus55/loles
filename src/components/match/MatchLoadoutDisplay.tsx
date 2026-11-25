@@ -145,7 +145,7 @@ export const MatchSpellsAndRunes: React.FC<MatchSpellsAndRunesProps> = ({
               position="top"
             >
               <div
-                className={`${boxSize} rounded overflow-hidden border border-neutral-700/80 bg-neutral-950`}
+                className={`${boxSize} rounded overflow-hidden border border-neutral-700/70 bg-neutral-950/90`}
               >
                 <img
                   src={spell.iconUrl}
@@ -157,7 +157,7 @@ export const MatchSpellsAndRunes: React.FC<MatchSpellsAndRunesProps> = ({
           ) : (
             <div
               key={`empty-spell-${idx}`}
-              className={`${boxSize} rounded border border-neutral-800/60 bg-neutral-950/60`}
+              className={`${boxSize} rounded border border-neutral-800/40 bg-neutral-950/40`}
             />
           )
         )}
@@ -168,7 +168,7 @@ export const MatchSpellsAndRunes: React.FC<MatchSpellsAndRunesProps> = ({
         <Tooltip title="Runes" content={runeTooltipContent} position="top">
           <div className="flex flex-col gap-1">
             <div
-              className={`${boxSize} rounded-full overflow-hidden border border-neutral-700 bg-neutral-950 flex items-center justify-center p-0.5`}
+              className={`${boxSize} rounded-full overflow-hidden border border-neutral-700/70 bg-neutral-950/90 flex items-center justify-center p-0.5`}
             >
               {keystone ? (
                 <img
@@ -185,7 +185,7 @@ export const MatchSpellsAndRunes: React.FC<MatchSpellsAndRunesProps> = ({
               ) : null}
             </div>
             <div
-              className={`${boxSize} rounded-full overflow-hidden border border-neutral-800 bg-neutral-950/90 flex items-center justify-center p-1`}
+              className={`${boxSize} rounded-full overflow-hidden border border-neutral-800/70 bg-neutral-950/80 flex items-center justify-center p-1`}
             >
               {subStyle ? (
                 <img
@@ -199,8 +199,8 @@ export const MatchSpellsAndRunes: React.FC<MatchSpellsAndRunesProps> = ({
         </Tooltip>
       ) : (
         <div className="flex flex-col gap-1">
-          <div className={`${boxSize} rounded-full border border-neutral-800/60 bg-neutral-950/60`} />
-          <div className={`${boxSize} rounded-full border border-neutral-800/60 bg-neutral-950/60`} />
+          <div className={`${boxSize} rounded-full border border-neutral-800/40 bg-neutral-950/40`} />
+          <div className={`${boxSize} rounded-full border border-neutral-800/40 bg-neutral-950/40`} />
         </div>
       )}
     </div>
@@ -244,7 +244,7 @@ export const MatchItemsRow: React.FC<MatchItemsRowProps> = ({
       return (
         <div
           key={key}
-          className={`${dimClass} border border-neutral-800/60 bg-neutral-950/50 shrink-0`}
+          className={`${dimClass} border border-neutral-800/35 bg-neutral-950/35 shrink-0`}
         />
       );
     }
@@ -263,7 +263,7 @@ export const MatchItemsRow: React.FC<MatchItemsRowProps> = ({
         position="top"
       >
         <div
-          className={`${dimClass} overflow-hidden border border-neutral-700/80 bg-neutral-950 shrink-0 hover:border-neutral-400 transition-colors`}
+          className={`${dimClass} overflow-hidden border border-neutral-700/60 bg-neutral-950 shrink-0 hover:border-neutral-400/80 transition-colors`}
         >
           <img
             src={iconUrl}
@@ -281,7 +281,7 @@ export const MatchItemsRow: React.FC<MatchItemsRowProps> = ({
       <div className="flex items-center gap-1">
         {slots.map((id, idx) => renderItemSlot(id, `item-${idx}-${id ?? "empty"}`))}
       </div>
-      <div className="w-px h-5 bg-neutral-800 mx-0.5" />
+      <div className="w-px h-4 bg-neutral-800/70 mx-0.5" />
       {renderItemSlot(trinketId, `trinket-${trinketId ?? "empty"}`, true)}
     </div>
   );

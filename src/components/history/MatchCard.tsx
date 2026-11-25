@@ -9,6 +9,12 @@ import {
 } from "@/components/match/MatchLoadoutDisplay";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { buildMatchupUrl, mapRiotRoleToAppRole } from "@/lib/matchup/url";
+import {
+  formatTimeAgo,
+  getChampionDisplayName,
+  getChampionIconUrl,
+  getRoleIconSrc,
+} from "./historyHelpers";
 
 export interface MatchRecordDTO extends MatchLoadoutFields {
   id: string;
@@ -54,69 +60,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   matchAssets,
   mounted,
 }) => {
-  const timeAgo = (dateStr: string | Date) => {
-    const seconds = Math.floor((new Date().getTime() - new Date(dateStr).getTime()) / 1000);
-
-    const intervals = {
-      year: 31536000,
-      month: 2592000,
-      week: 604800,
-      day: 86400,
-      hour: 3600,
-      minute: 60,
-      second: 1,
-    };
-
-    for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-      const interval = Math.floor(seconds / secondsInUnit);
-      if (interval >= 1) {
-        return `${interval} ${unit}${interval === 1 ? "" : "s"} ago`;
-      }
-    }
-    return "Just now";
-  };
-
-  const getChampionDisplayName = (champName: string) => {
-    const champData = champions.find(
-      (c) =>
-        c.name === champName ||
-        c.id === champName ||
-        c.name.toLowerCase() === champName.toLowerCase()
-    );
-    return champData?.name || champName;
-  };
-
-  const getChampionIconUrl = (champName: string) => {
-    let normalized = champName;
-    if (champName === "FiddleSticks") normalized = "Fiddlesticks";
-    const champData = champions.find(
-      (c) =>
-        c.name === champName ||
-        c.id === champName ||
-        c.name.toLowerCase() === champName.toLowerCase()
-    );
-
-    if (champData?.iconUrl) return champData.iconUrl;
-
-    const id = champData ? champData.id : normalized;
-    return `https://ddragon.leagueoflegends.com/cdn/${matchAssets.version}/img/champion/${id}.png`;
-  };
-
-  const getRoleIcon = (role: string) => {
-    let src = "/roles/top.webp";
-    if (role === "JUNGLE" || role === "JGL") src = "/roles/jg.webp";
-    if (role === "MIDDLE" || role === "MID") src = "/roles/mid.webp";
-    if (role === "BOTTOM" || role === "ADC") src = "/roles/adc.webp";
-    if (role === "UTILITY" || role === "SUPP") src = "/roles/supp.webp";
-
-    return (
-      <div className="w-5 h-5 relative opacity-80 group-hover:opacity-100 transition-opacity drop-shadow-md">
-        <Image src={src} alt={role} fill className="object-contain" />
-      </div>
-    );
-  };
-
-  const isRemake = match.gameDuration < 240; // Less than 4 minutes
+  const isRemake = match.gameDuration < 240;
   const isWin = !isRemake && match.win;
 
   const kda =
@@ -128,7 +72,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   const csPerMin = (match.cs / Math.max(1, match.gameDuration / 60)).toFixed(1);
 
   const appRole = mapRiotRoleToAppRole(match.role);
-  const roleEnum = appRole || match.role;
+  const roleLabel = appRole || match.role;
 
   const targetUrl =
     appRole && match.enemyChampionName
@@ -144,140 +88,176 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         )
       : "/matchups";
 
+  const accentBarClass = isRemake
+    ? "bg-neutral-600"
+    : isWin
+      ? "bg-blue-500/90"
+      : "bg-red-500/90";
+
+  const tintClass = isRemake
+    ? ""
+    : isWin
+      ? "bg-gradient-to-r from-blue-500/[0.04] via-transparent to-transparent"
+      : "bg-gradient-to-r from-red-500/[0.04] via-transparent to-transparent";
+
+  const outcomeLabel = isRemake ? "Remake" : isWin ? "Victory" : "Defeat";
+  const outcomeColorClass = isRemake
+    ? "text-neutral-500"
+    : isWin
+      ? "text-blue-400"
+      : "text-red-400";
+
+  const myChampName = getChampionDisplayName(match.championName, champions);
+  const hasMatchup = Boolean(match.enemyChampionName && match.role !== "UNKNOWN");
+
   return (
     <Link
       href={targetUrl}
-      className="group flex flex-col border rounded-lg relative hover:z-20 shadow-sm hover:-translate-y-0.5 transition-all cursor-pointer bg-neutral-900/60 border-neutral-700/50 hover:border-neutral-600/50 hover:bg-neutral-800/50"
+      className={`group relative block rounded-lg border border-neutral-800/75 bg-neutral-900/35 hover:bg-neutral-900/70 hover:border-neutral-700/80 transition-colors cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60 ${tintClass}`}
     >
-      {/* Status Bar */}
-      <div
-        className={`absolute left-0 top-0 bottom-0 w-1.5 rounded-l-lg ${
-          isRemake ? "bg-neutral-500" : isWin ? "bg-blue-600" : "bg-red-600"
-        }`}
-      />
+      <div className={`absolute inset-y-0 left-0 w-[3px] ${accentBarClass}`} />
 
-      <div className="w-full p-3.5 sm:p-4 pl-5 sm:pl-6 flex flex-wrap lg:flex-nowrap items-center gap-4 lg:gap-5">
-        {/* Game Info */}
-        <div className="w-20 sm:w-22 shrink-0 text-left">
-          <p
-            className={`text-xs sm:text-sm font-bold tracking-wider ${
-              isRemake ? "text-neutral-500" : isWin ? "text-blue-500" : "text-red-500"
-            }`}
-          >
-            {isRemake ? "REMAKE" : isWin ? "VICTORY" : "DEFEAT"}
+      <div className="px-3.5 py-2.5 pl-4 sm:px-4 sm:py-3 sm:pl-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 lg:grid lg:grid-cols-[82px_100px_154px_minmax(0,1fr)_118px_22px] lg:gap-4">
+        {/* Outcome, Duration & Relative Time */}
+        <div className="min-w-[74px] text-left">
+          <p className={`text-xs font-semibold tracking-wide uppercase ${outcomeColorClass}`}>
+            {outcomeLabel}
           </p>
-          <p className="text-xs text-neutral-400 mt-0.5">
+          <p className="text-[11px] text-neutral-300 tabular-nums mt-0.5">
             {durationMins}m {durationSecs}s
           </p>
-          <p className="text-[11px] text-neutral-500 mt-0.5">
-            {mounted ? timeAgo(match.gameCreation) : "Just now"}
+          <p className="text-[11px] text-neutral-500">
+            {mounted ? formatTimeAgo(match.gameCreation) : "Just now"}
           </p>
         </div>
 
-        {/* Player Champ + Summoner Spells & Runes */}
-        <div className="flex items-center gap-2.5 shrink-0">
-          <Tooltip compact content={getChampionDisplayName(match.championName)} position="top">
-            <div className="relative w-12 h-12 sm:w-13 sm:h-13 rounded-full overflow-hidden border-2 border-neutral-800 shrink-0">
+        {/* Champion + Spells & Runes */}
+        <div className="flex items-center gap-2 shrink-0">
+          <Tooltip compact content={myChampName} position="top">
+            <div className="relative w-11 h-11 rounded-full overflow-hidden border border-neutral-700/70 shrink-0">
               <Image
-                src={getChampionIconUrl(match.championName)}
-                alt={match.championName}
+                src={getChampionIconUrl(match.championName, champions, matchAssets.version)}
+                alt={myChampName}
                 fill
                 className="object-cover"
               />
             </div>
           </Tooltip>
-          <MatchSpellsAndRunes match={match} assets={matchAssets} size="md" />
+          <MatchSpellsAndRunes match={match} assets={matchAssets} size="sm" />
         </div>
 
         {/* KDA & CS */}
-        <div className="w-28 sm:w-32 shrink-0 text-center border-l border-neutral-800/50 pl-3">
-          <p className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight">
-            {match.kills} / <span className="text-red-500">{match.deaths}</span> / {match.assists}
+        <div className="text-left lg:text-center shrink-0">
+          <p className="text-[15px] font-semibold text-neutral-100 tabular-nums leading-tight">
+            {match.kills}
+            <span className="text-neutral-600 font-normal mx-1">/</span>
+            <span className="text-red-400">{match.deaths}</span>
+            <span className="text-neutral-600 font-normal mx-1">/</span>
+            {match.assists}
           </p>
-          <p className="text-[11px] text-neutral-400 mt-0.5 font-medium">
-            {kda} KDA <span className="text-neutral-600">•</span> CS {match.cs} ({csPerMin})
+          <p className="text-[11px] text-neutral-400 mt-0.5 whitespace-nowrap tabular-nums">
+            <span className="text-neutral-300 font-medium">{kda}</span> KDA
+            <span className="text-neutral-600 mx-1">·</span>
+            {match.cs} CS <span className="text-neutral-500">({csPerMin})</span>
           </p>
         </div>
 
         {/* Items Row */}
-        <div className="flex items-center border-l border-neutral-800/50 pl-3 sm:pl-4">
+        <div className="flex items-center min-w-0">
           <MatchItemsRow match={match} assets={matchAssets} size="md" />
         </div>
 
-        {/* Matchup vs (fixed-width aligned block, hover tooltips for names) */}
-        {match.enemyChampionName && match.role !== "UNKNOWN" && (
-          <div className="hidden lg:flex items-center justify-between w-[140px] ml-auto border-l border-neutral-800/50 pl-4 shrink-0">
-            {/* Ally Partner Slot (fixed width so VS stays perfectly aligned across rows) */}
-            <div className="w-8 flex flex-col items-center justify-center shrink-0">
-              {match.partnerChampionName && (
-                <Tooltip
-                  compact
-                  content={`Ally: ${getChampionDisplayName(match.partnerChampionName)}`}
-                  position="top"
-                >
-                  <div className="flex flex-col items-center opacity-85 hover:opacity-100 transition-opacity">
-                    <span className="text-[9px] text-neutral-500 font-bold uppercase leading-none mb-1">
-                      Ally
-                    </span>
-                    <div className="w-7 h-7 rounded-full overflow-hidden border border-neutral-700 relative">
+        {/* Lane Matchup */}
+        <div className="flex items-center justify-end lg:justify-between gap-2 shrink-0">
+          {hasMatchup && match.enemyChampionName ? (
+            <>
+              <div className="hidden lg:flex w-6 justify-center shrink-0">
+                {match.partnerChampionName && (
+                  <Tooltip
+                    compact
+                    content={`Ally: ${getChampionDisplayName(match.partnerChampionName, champions)}`}
+                    position="top"
+                  >
+                    <div className="w-6 h-6 rounded-full overflow-hidden border border-neutral-700/80 opacity-85 hover:opacity-100 transition-opacity relative">
                       <Image
-                        src={getChampionIconUrl(match.partnerChampionName)}
+                        src={getChampionIconUrl(
+                          match.partnerChampionName,
+                          champions,
+                          matchAssets.version
+                        )}
                         alt={match.partnerChampionName}
                         fill
                         className="object-cover"
                       />
                     </div>
-                  </div>
-                </Tooltip>
-              )}
-            </div>
+                  </Tooltip>
+                )}
+              </div>
 
-            <span className="text-[10px] text-neutral-600 font-black italic uppercase tracking-wider shrink-0">
-              vs
-            </span>
+              <span className="text-[10px] text-neutral-600 font-semibold uppercase tracking-wider shrink-0">
+                vs
+              </span>
 
-            {/* Enemy Champion + Enemy Partner Slot (fixed width) */}
-            <div className="w-[58px] flex items-center justify-start shrink-0">
-              <Tooltip
-                compact
-                content={`vs ${getChampionDisplayName(match.enemyChampionName)}`}
-                position="top"
-              >
-                <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-neutral-800 opacity-90 hover:opacity-100 relative z-10 drop-shadow-md transition-opacity">
-                  <Image
-                    src={getChampionIconUrl(match.enemyChampionName)}
-                    alt={match.enemyChampionName}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </Tooltip>
-              {match.enemyPartnerChampionName && (
+              <div className="flex items-center lg:w-[54px] shrink-0">
                 <Tooltip
                   compact
-                  content={`Enemy Partner: ${getChampionDisplayName(match.enemyPartnerChampionName)}`}
+                  content={`vs ${getChampionDisplayName(match.enemyChampionName, champions)}`}
                   position="top"
-                  className="inline-flex -ml-2.5 z-0 hover:z-20"
                 >
-                  <div className="w-7 h-7 rounded-full overflow-hidden border border-neutral-700 opacity-75 hover:opacity-100 relative transition-all">
+                  <div className="w-8 h-8 rounded-full overflow-hidden border border-neutral-700/80 opacity-90 group-hover:opacity-100 relative z-10 transition-opacity">
                     <Image
-                      src={getChampionIconUrl(match.enemyPartnerChampionName)}
-                      alt={match.enemyPartnerChampionName}
+                      src={getChampionIconUrl(
+                        match.enemyChampionName,
+                        champions,
+                        matchAssets.version
+                      )}
+                      alt={match.enemyChampionName}
                       fill
                       className="object-cover"
                     />
                   </div>
                 </Tooltip>
-              )}
-            </div>
-          </div>
-        )}
+                {match.enemyPartnerChampionName && (
+                  <Tooltip
+                    compact
+                    content={`Enemy Partner: ${getChampionDisplayName(
+                      match.enemyPartnerChampionName,
+                      champions
+                    )}`}
+                    position="top"
+                    className="inline-flex -ml-2 z-0 hover:z-20"
+                  >
+                    <div className="w-6 h-6 rounded-full overflow-hidden border border-neutral-800 opacity-80 hover:opacity-100 relative transition-opacity">
+                      <Image
+                        src={getChampionIconUrl(
+                          match.enemyPartnerChampionName,
+                          champions,
+                          matchAssets.version
+                        )}
+                        alt={match.enemyPartnerChampionName}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </Tooltip>
+                )}
+              </div>
+            </>
+          ) : (
+            <span className="hidden lg:block" />
+          )}
+        </div>
 
         {/* Role */}
-        <div className="ml-auto lg:ml-0 flex shrink-0">
-          <Tooltip compact content={roleEnum} position="top">
-            <div className="w-8 h-8 flex items-center justify-center bg-neutral-900 border border-neutral-800 rounded-lg text-neutral-400">
-              {getRoleIcon(match.role)}
+        <div className="flex justify-end shrink-0">
+          <Tooltip compact content={roleLabel} position="top">
+            <div className="w-5 h-5 relative opacity-70 group-hover:opacity-100 transition-opacity">
+              <Image
+                src={getRoleIconSrc(match.role)}
+                alt={roleLabel}
+                fill
+                className="object-contain"
+              />
             </div>
           </Tooltip>
         </div>
