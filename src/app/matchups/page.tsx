@@ -28,7 +28,7 @@ export default async function MatchupsPage() {
   const preferredRole = dbUser?.primaryRole || undefined;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-6 sm:py-8 max-w-5xl">
       <DashboardClient champions={champions} preferredRole={preferredRole} />
     </div>
   );

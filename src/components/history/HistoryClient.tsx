@@ -89,7 +89,7 @@ export const HistoryClient: React.FC<HistoryClientProps> = ({
               onClick={handleSync}
               variant="outline"
               size="sm"
-              className="border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+              className="border-accent/40 text-accent-soft hover:bg-accent/10 hover:text-white"
             >
               Fetch Match History
             </Button>

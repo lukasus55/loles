@@ -19,7 +19,7 @@ export const Spinner: React.FC<SpinnerProps> = ({ size = 'md', className = '' })
         style={{ borderTopColor: 'transparent', borderRightColor: 'transparent' }}
       ></div>
       <div 
-        className={`${sizeClasses[size]} rounded-full border-red-600 animate-spin`}
+        className={`${sizeClasses[size]} rounded-full border-accent animate-spin`}
         style={{ borderBottomColor: 'transparent', borderLeftColor: 'transparent', animationDirection: 'reverse', animationDuration: '1s' }}
       ></div>
     </div>

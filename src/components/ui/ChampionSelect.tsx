@@ -53,17 +53,17 @@ export const ChampionSelect: React.FC<ChampionSelectProps> = ({
 
   return (
     <div className="relative w-full" ref={containerRef}>
-      {label && <label className="block text-sm font-medium text-neutral-400 mb-1.5">{label}</label>}
+      {label && <label className="block text-xs font-medium text-neutral-400 mb-1.5">{label}</label>}
       
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between bg-neutral-950 border border-neutral-800 rounded-lg h-12 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors hover:bg-neutral-900 cursor-pointer shadow-inner ${buttonClassName || ''}`}
+        className={`w-full flex items-center justify-between bg-neutral-950/90 border border-neutral-800 rounded-lg h-10 px-3 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/70 transition-colors hover:bg-neutral-900 cursor-pointer ${buttonClassName || ''}`}
       >
-        <div className="flex items-center space-x-3 overflow-hidden">
+        <div className="flex items-center space-x-2.5 overflow-hidden">
           {selectedChamp ? (
             <>
-              <img src={selectedChamp.iconUrl} alt={selectedChamp.name} className="w-7 h-7 rounded-md object-cover border border-neutral-700" />
+              <img src={selectedChamp.iconUrl} alt={selectedChamp.name} className="w-6 h-6 rounded-md object-cover border border-neutral-700" />
               <span className="text-white font-medium truncate">{selectedChamp.name}</span>
             </>
           ) : (
@@ -98,7 +98,7 @@ export const ChampionSelect: React.FC<ChampionSelectProps> = ({
                 placeholder="Search champion..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-md py-2.5 pl-9 pr-3 text-sm text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-neutral-500"
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-md py-2 pl-9 pr-3 text-sm text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all placeholder-neutral-500"
               />
             </div>
           </div>
@@ -117,7 +117,7 @@ export const ChampionSelect: React.FC<ChampionSelectProps> = ({
                     }}
                     className="flex items-center space-x-3 w-full p-2.5 rounded-md hover:bg-neutral-800 transition-colors cursor-pointer text-left group"
                   >
-                    <img src={champ.iconUrl} alt={champ.name} className="w-8 h-8 rounded-md object-cover border border-neutral-700 group-hover:border-red-500/50 transition-colors" />
+                    <img src={champ.iconUrl} alt={champ.name} className="w-7 h-7 rounded-md object-cover border border-neutral-700 group-hover:border-accent/60 transition-colors" />
                     <span className="text-sm font-medium text-neutral-300 group-hover:text-white transition-colors">{champ.name}</span>
                   </button>
                 ))}

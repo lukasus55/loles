@@ -56,7 +56,7 @@ export const Navbar = async () => {
               <Link href="/login" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors hidden sm:block">
                 Log in
               </Link>
-              <Link href="/signup" className="px-4 py-2 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors shadow-sm shadow-red-900/50">
+              <Link href="/signup" className="px-4 py-2 text-sm font-medium bg-accent-dark hover:bg-accent-hover text-white rounded-md transition-colors shadow-sm">
                 Sign up
               </Link>
             </>

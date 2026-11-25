@@ -113,7 +113,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   return (
     <Link
       href={targetUrl}
-      className={`group relative block rounded-lg border border-neutral-800/75 bg-neutral-900/35 hover:bg-neutral-900/70 hover:border-neutral-700/80 transition-colors cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60 ${tintClass}`}
+      className={`group relative block rounded-lg border border-neutral-800/75 bg-neutral-900/35 hover:bg-neutral-900/70 hover:border-neutral-700/80 transition-colors cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${tintClass}`}
     >
       <div className={`absolute inset-y-0 left-0 w-[3px] ${accentBarClass}`} />
 

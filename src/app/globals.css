@@ -20,6 +20,10 @@ html {
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-accent: #ff003b;
+  --color-accent-hover: #e00034;
+  --color-accent-dark: #cc0038;
+  --color-accent-soft: #ff4d73;
 }
 
 @media (prefers-color-scheme: dark) {
