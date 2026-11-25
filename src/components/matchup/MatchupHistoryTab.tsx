@@ -62,41 +62,44 @@ export const MatchupHistoryTab: React.FC<MatchupHistoryTabProps> = ({
       {/* Scope Switcher (Botlane 2v2 vs All 1v1) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center tracking-tight">
-            <span className="w-1.5 h-5 bg-red-600 rounded-full mr-3 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span>
+          <h3 className="text-base font-semibold text-white tracking-tight">
             Played Games in this Matchup
           </h3>
-          <p className="text-xs text-neutral-500 mt-0.5 pl-4">
+          <p className="text-xs text-neutral-500 mt-0.5">
             Showing {activeMatches.length} {activeMatches.length === 1 ? "game" : "games"} (remakes excluded)
           </p>
         </div>
 
         {hasPartnerFilter && (
-          <div className="flex items-center gap-1 bg-neutral-900 border border-neutral-800 p-1 rounded-lg w-fit">
-            <Button
+          <div className="inline-flex items-center gap-0.5 bg-neutral-900/70 border border-neutral-800/80 p-0.5 rounded-lg w-fit">
+            <button
               type="button"
-              size="sm"
-              variant={scope === "exact" ? "primary" : "ghost"}
               onClick={() => setScope("exact")}
-              className="h-7 px-3 text-xs"
+              className={`h-7 px-3 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                scope === "exact"
+                  ? "bg-accent/15 border border-accent/45 text-white"
+                  : "border border-transparent text-neutral-400 hover:text-white"
+              }`}
             >
               Exact 2v2 ({exactMatches.length})
-            </Button>
-            <Button
+            </button>
+            <button
               type="button"
-              size="sm"
-              variant={scope === "broad" ? "primary" : "ghost"}
               onClick={() => setScope("broad")}
-              className="h-7 px-3 text-xs"
+              className={`h-7 px-3 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                scope === "broad"
+                  ? "bg-accent/15 border border-accent/45 text-white"
+                  : "border border-transparent text-neutral-400 hover:text-white"
+              }`}
             >
               All {getChampName(myPick)} vs {getChampName(enemyPick)} ({broadMatches.length})
-            </Button>
+            </button>
           </div>
         )}
       </div>
 
       {activeMatches.length === 0 ? (
-        <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-10 text-center flex flex-col items-center">
+        <div className="bg-neutral-900/30 border border-neutral-800/75 rounded-lg p-10 text-center flex flex-col items-center">
           <div className="w-12 h-12 rounded-full bg-neutral-950 border border-neutral-800 flex items-center justify-center mb-3">
             <History className="w-5 h-5 text-neutral-500" />
           </div>
@@ -142,11 +145,11 @@ export const MatchupHistoryTab: React.FC<MatchupHistoryTabProps> = ({
             return (
               <div
                 key={match.id}
-                className="relative flex flex-wrap lg:flex-nowrap items-center gap-4 p-3.5 pl-5 bg-neutral-900/60 border border-neutral-800/80 rounded-xl hover:border-neutral-700/80 transition-colors"
+                className="relative flex flex-wrap lg:flex-nowrap items-center gap-4 p-3 pl-4 bg-neutral-900/35 border border-neutral-800/75 rounded-lg hover:border-neutral-700/80 transition-colors overflow-hidden"
               >
                 <div
-                  className={`absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl ${
-                    isWin ? "bg-blue-600" : "bg-red-600"
+                  className={`absolute inset-y-0 left-0 w-[3px] ${
+                    isWin ? "bg-blue-500/90" : "bg-red-500/90"
                   }`}
                 />
 
@@ -276,7 +279,7 @@ export const MatchupHistoryTab: React.FC<MatchupHistoryTabProps> = ({
                           onClick={() => onSaveAsPreset(match)}
                           className="h-8 px-2.5 text-xs gap-1.5 text-neutral-400 hover:text-white border border-neutral-800/80 hover:border-neutral-700"
                         >
-                          <BookmarkPlus className="w-3.5 h-3.5 text-red-400" />
+                          <BookmarkPlus className="w-3.5 h-3.5 text-accent-soft" />
                           <span className="hidden sm:inline">Preset</span>
                         </Button>
                       </Tooltip>

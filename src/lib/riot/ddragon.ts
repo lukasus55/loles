@@ -91,6 +91,7 @@ interface RawDDragonItem {
   tags?: string[];
   maps?: Record<string, boolean>;
   inStore?: boolean;
+  requiredChampion?: string;
 }
 
 interface RawDDragonSummonerSpell {
@@ -172,6 +173,8 @@ export async function getItems(options?: { srOnly?: boolean }): Promise<Record<n
         tags: item.tags || [],
         purchasable,
         maps,
+        inStore: item.inStore,
+        requiredChampion: item.requiredChampion,
       };
     }
 
@@ -254,19 +257,33 @@ export async function getMatchAssets(): Promise<MatchAssetsData> {
 }
 
 /**
- * Purchasable Summoner's Rift items sorted for the interactive Build Picker.
- * Deduplicates identical name+gold entries (e.g. Ornn masterwork or mode duplicates).
+ * Purchasable items sorted for the interactive Build Picker.
+ * Standard Summoner's Rift items (`maps["11"]`, `id < 10000`, `inStore !== false`)
+ * are prioritized during deduplication and flagged with `isSummonersRift: true`.
  */
 export async function getShopItems(): Promise<ShopItemData[]> {
-  const srItems = await getItems({ srOnly: true });
+  const allItems = await getItems();
   const seen = new Set<string>();
   const list: ShopItemData[] = [];
 
-  for (const item of Object.values(srItems)) {
-    if (!item.name || item.gold <= 0) continue;
+  const sortedEntries = Object.values(allItems).sort((a, b) => {
+    const aIsSr = Boolean(a.maps["11"] && a.id < 10000 && a.inStore !== false);
+    const bIsSr = Boolean(b.maps["11"] && b.id < 10000 && b.inStore !== false);
+    if (aIsSr !== bIsSr) return aIsSr ? -1 : 1;
+    return a.id - b.id;
+  });
+
+  for (const item of sortedEntries) {
+    if (!item.name || item.gold <= 0 || !item.purchasable || item.inStore === false) continue;
+    if (item.requiredChampion) continue;
+    // Exclude Arena stat-anvil / random-item placeholders (220000-220099)
+    if (item.id >= 220000 && item.id <= 220099) continue;
+
     const dedupKey = `${item.name.toLowerCase()}::${item.gold}`;
     if (seen.has(dedupKey)) continue;
     seen.add(dedupKey);
+
+    const isSummonersRift = Boolean(item.maps["11"] && item.id < 10000);
 
     list.push({
       id: item.id,
@@ -276,6 +293,7 @@ export async function getShopItems(): Promise<ShopItemData[]> {
       iconUrl: item.iconUrl,
       gold: item.gold,
       tags: item.tags,
+      isSummonersRift,
     });
   }
 

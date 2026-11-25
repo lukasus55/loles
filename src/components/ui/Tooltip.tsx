@@ -15,6 +15,8 @@ interface TooltipProps {
   compact?: boolean;
   /** Optional custom width / padding override for rich custom cards (e.g. LoL item tooltips) */
   cardClassName?: string;
+  /** Disable tooltip opening (e.g. during active drag) */
+  disabled?: boolean;
 }
 
 const VIEWPORT_MARGIN = 12;
@@ -42,6 +44,7 @@ export const Tooltip = ({
   className = "inline-flex",
   compact = false,
   cardClassName,
+  disabled = false,
 }: TooltipProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -155,13 +158,14 @@ export const Tooltip = ({
     <div
       ref={triggerRef}
       className={`relative ${className}`}
-      onMouseEnter={() => setIsOpen(true)}
+      onMouseEnter={() => !disabled && setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
-      onFocus={() => setIsOpen(true)}
+      onFocus={() => !disabled && setIsOpen(true)}
       onBlur={() => setIsOpen(false)}
     >
       {children}
       {isOpen &&
+        !disabled &&
         typeof document !== "undefined" &&
         createPortal(
           <div

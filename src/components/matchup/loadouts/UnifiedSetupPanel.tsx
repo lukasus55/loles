@@ -52,47 +52,48 @@ export const UnifiedSetupPanel: React.FC<UnifiedSetupPanelProps> = ({
   return (
     <div className="space-y-4">
       {/* Preset Pills Row */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-1.5">
         {setups.map((setup) => {
           const isActive = setup.id === selectedSetupId;
           return (
-            <Button
+            <button
               key={setup.id}
               type="button"
-              size="sm"
-              variant={isActive ? "primary" : "outline"}
               onClick={() => onSelectSetup(setup)}
-              className={
+              className={`h-7 px-3 rounded-md text-xs font-medium border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
                 isActive
-                  ? "h-8 px-3.5 text-xs font-semibold"
-                  : "h-8 px-3.5 text-xs border-neutral-800 bg-neutral-950/60 text-neutral-300 hover:text-white"
-              }
+                  ? "bg-accent/15 border-accent/50 text-white"
+                  : "bg-neutral-950/50 border-neutral-800/80 text-neutral-400 hover:text-white hover:border-neutral-700"
+              }`}
             >
               {setup.name}
-            </Button>
+            </button>
           );
         })}
 
-        <Button
+        <button
           type="button"
-          size="sm"
-          variant={selectedSetupId === null ? "secondary" : "ghost"}
           onClick={onStartNew}
-          className="h-8 px-3 text-xs gap-1 border border-dashed border-neutral-700 text-neutral-300 hover:text-white"
+          className={`h-7 px-2.5 rounded-md text-xs font-medium border border-dashed inline-flex items-center gap-1 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
+            selectedSetupId === null
+              ? "bg-neutral-800/80 border-neutral-600 text-white"
+              : "bg-transparent border-neutral-700/80 text-neutral-400 hover:text-white hover:border-neutral-600"
+          }`}
         >
           <Plus className="w-3.5 h-3.5" />
           New Setup
-        </Button>
+        </button>
       </div>
 
-      {/* Name, Optional Tactical Hint & Actions */}
+      {/* Name, Optional Hint & Actions */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
         <div className="md:col-span-4">
           <Input
             label="Setup Name"
             value={draftName}
             onChange={(e) => onNameChange(e.target.value)}
-            placeholder="e.g. With Prio, Without Prio, Scaling"
+            placeholder="e.g. With Prio, Without Prio"
+            className="h-9 bg-neutral-950/70"
           />
         </div>
         <div className="md:col-span-5">
@@ -101,6 +102,7 @@ export const UnifiedSetupPanel: React.FC<UnifiedSetupPanelProps> = ({
             value={draftNote}
             onChange={(e) => onNoteChange(e.target.value)}
             placeholder="e.g. Push wave 1, crash wave 3 for cheater recall"
+            className="h-9 bg-neutral-950/70"
           />
         </div>
         <div className="md:col-span-3 flex items-center justify-end gap-2">
@@ -108,10 +110,10 @@ export const UnifiedSetupPanel: React.FC<UnifiedSetupPanelProps> = ({
             <Button
               type="button"
               variant="outline"
-              size="md"
+              size="sm"
               disabled={isSaving}
               onClick={() => onRequestDelete(selectedSetupId, draftName || "this setup")}
-              className="border-red-900/50 text-red-500 hover:bg-red-950/40 hover:text-red-400 px-3 disabled:cursor-not-allowed"
+              className="h-9 w-9 p-0 border-red-900/50 text-red-400 hover:bg-red-950/40 hover:text-red-300 disabled:cursor-not-allowed"
               aria-label="Delete setup"
             >
               <Trash2 className="w-4 h-4" />
@@ -120,19 +122,19 @@ export const UnifiedSetupPanel: React.FC<UnifiedSetupPanelProps> = ({
           <Button
             type="button"
             variant="primary"
-            size="md"
+            size="sm"
             disabled={isSaving || !draftName.trim()}
             onClick={onSave}
-            className="flex-1 md:flex-none gap-1.5 px-4 disabled:cursor-not-allowed"
+            className="flex-1 md:flex-none h-9 gap-1.5 px-4 disabled:cursor-not-allowed"
           >
-            {isSaving ? <Spinner size="sm" /> : <Save className="w-4 h-4" />}
+            {isSaving ? <Spinner size="sm" /> : <Save className="w-3.5 h-3.5" />}
             {selectedSetupId ? "Update" : "Save"}
           </Button>
         </div>
       </div>
 
       {/* Interactive Pickers Side-by-Side */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
         <RunePicker trees={matchAssets.runes} value={draftRunes} onChange={onRunesChange} />
         <BuildPicker
           value={draftBuild}

@@ -108,7 +108,7 @@ export default async function MatchupPage({
     : broadMatches;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 sm:py-8">
       <MatchupHubClient
         key={`${role}-${myPick}-${enemyPick}-${mySupp ?? ""}-${enemySupp ?? ""}`}
         role={role}

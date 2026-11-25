@@ -43,6 +43,8 @@ export interface ItemData {
   tags: string[];
   purchasable: boolean;
   maps: Record<string, boolean>;
+  inStore?: boolean;
+  requiredChampion?: string;
 }
 
 export interface ItemSummary {
@@ -56,6 +58,7 @@ export interface ItemSummary {
 
 export interface ShopItemData extends ItemSummary {
   tags: string[];
+  isSummonersRift?: boolean;
 }
 
 export interface SummonerSpellData {

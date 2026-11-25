@@ -2,7 +2,6 @@
 
 import React from "react";
 import { MatchupStrategyEditor } from "@/components/notes/editor/MatchupStrategyEditor";
-import { Button } from "@/components/ui/Button";
 import { Role } from "@/components/notes/RoleFilter";
 import { MatchAssetsData, ShopItemData } from "@/lib/riot/assets";
 import { BuildPresetDTO, RunePresetDTO, SetupPresetDTO } from "@/lib/matchup/loadouts";
@@ -50,9 +49,33 @@ export const MatchupStrategyTab: React.FC<MatchupStrategyTabProps> = ({
   shopItems,
   onNoteAutoCreated,
 }) => {
+  const prioSelector = (
+    <div className="flex items-center gap-2">
+      <span className="text-xs text-neutral-500">Lane Prio:</span>
+      <div className="inline-flex items-center gap-0.5 bg-neutral-900/70 border border-neutral-800/80 p-0.5 rounded-lg">
+        {PRIO_OPTIONS.map((option) => {
+          const isSelected = prio === option;
+          return (
+            <button
+              key={option}
+              type="button"
+              onClick={() => onPrioChange(option)}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                isSelected
+                  ? "bg-accent/15 border border-accent/45 text-white"
+                  : "border border-transparent text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+              }`}
+            >
+              {option}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="space-y-8">
-      {/* Interactive Runes & Builds Presets Section */}
+    <div className="space-y-6">
       <MatchupLoadoutsSection
         matchup={matchup}
         initialDetachLoadouts={initialDetachLoadouts}
@@ -65,36 +88,7 @@ export const MatchupStrategyTab: React.FC<MatchupStrategyTabProps> = ({
         onNoteAutoCreated={onNoteAutoCreated}
       />
 
-      {/* Strategy Markdown Editor + Lane Priority */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <MatchupStrategyEditor notes={notes} onChange={onNotesChange} />
-
-        <div className="space-y-6">
-          <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-5 shadow-sm">
-            <h3 className="text-md font-bold text-white mb-4">Lane Priority</h3>
-            <div className="flex flex-col space-y-2">
-              {PRIO_OPTIONS.map((option) => {
-                const isSelected = prio === option;
-                return (
-                  <Button
-                    key={option}
-                    type="button"
-                    variant="outline"
-                    onClick={() => onPrioChange(option)}
-                    className={`justify-start h-11 px-4 text-sm font-medium transition-all ${
-                      isSelected
-                        ? "bg-red-950/40 border-red-900 text-white hover:bg-red-950/60 shadow-[0_0_10px_rgba(239,68,68,0.1)]"
-                        : "bg-neutral-950 border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white"
-                    }`}
-                  >
-                    {option}
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
+      <MatchupStrategyEditor notes={notes} onChange={onNotesChange} rightSlot={prioSelector} />
     </div>
   );
 };
