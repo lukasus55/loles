@@ -3,7 +3,6 @@ import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { ChampionData } from "@/lib/riot/assets";
 import { ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { PerspectiveOption, StatRowData, StatsGroupBy } from "@/lib/stats/analytics";
 
 export type { StatRowData };
@@ -105,31 +104,29 @@ export const StatsTable: React.FC<StatsTableProps> = ({
   }, [data, sortCol, sortDir, champMap]);
 
   return (
-    <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
-      <div className="p-4 sm:p-5 border-b border-neutral-800/50 shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight truncate">
+    <div className="bg-neutral-900/35 border border-neutral-800/75 rounded-lg overflow-hidden flex flex-col h-full">
+      <div className="px-4 sm:px-5 py-3.5 border-b border-neutral-800/60 shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <h3 className="text-base sm:text-lg font-semibold text-white tracking-tight truncate">
           {title}
         </h3>
 
         {perspectives.length > 1 && onPerspectiveChange && (
-          <div className="flex flex-wrap items-center gap-1.5 bg-neutral-950/80 border border-neutral-800 p-1 rounded-lg w-fit">
+          <div className="inline-flex flex-wrap items-center gap-0.5 bg-neutral-950/60 border border-neutral-800/80 p-0.5 rounded-lg w-fit">
             {perspectives.map((p) => {
               const isActive = p.id === activePerspective;
               return (
-                <Button
+                <button
                   key={p.id}
                   type="button"
-                  size="sm"
-                  variant={isActive ? "primary" : "ghost"}
                   onClick={() => onPerspectiveChange(p.id)}
-                  className={
+                  className={`h-7 px-3 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                     isActive
-                      ? "h-7 px-3 text-xs font-semibold"
-                      : "h-7 px-3 text-xs text-neutral-400 hover:text-white"
-                  }
+                      ? "bg-accent/15 border border-accent/45 text-white"
+                      : "border border-transparent text-neutral-400 hover:text-white"
+                  }`}
                 >
                   {p.label}
-                </Button>
+                </button>
               );
             })}
           </div>
@@ -146,11 +143,11 @@ export const StatsTable: React.FC<StatsTableProps> = ({
       ) : (
         <div className="overflow-y-auto flex-1 custom-scrollbar">
           <table className="w-full text-sm text-left table-fixed">
-            <thead className="text-[10px] sm:text-xs text-neutral-400 uppercase bg-neutral-950 sticky top-0 z-10 border-b border-neutral-800/50 shadow-sm">
+            <thead className="text-[11px] text-neutral-400 uppercase bg-neutral-950/95 sticky top-0 z-10 border-b border-neutral-800/60">
               <tr>
                 <th
                   scope="col"
-                  className="px-4 py-3 sm:px-6 cursor-pointer group hover:bg-neutral-900/50 transition-colors w-[45%] sm:w-[28%] relative"
+                  className="px-4 py-2.5 sm:px-5 cursor-pointer group hover:bg-neutral-900/50 transition-colors w-[45%] sm:w-[28%] relative"
                   onClick={() => handleSort("championName")}
                 >
                   <div className="flex items-center gap-2">{columnLabel}</div>
@@ -160,7 +157,7 @@ export const StatsTable: React.FC<StatsTableProps> = ({
                 </th>
                 <th
                   scope="col"
-                  className="px-4 py-3 sm:px-6 cursor-pointer group hover:bg-neutral-900/50 transition-colors text-center w-[20%] sm:w-[14%] relative"
+                  className="px-4 py-2.5 sm:px-5 cursor-pointer group hover:bg-neutral-900/50 transition-colors text-center w-[20%] sm:w-[14%] relative"
                   onClick={() => handleSort("played")}
                 >
                   <span>Played</span>
@@ -170,7 +167,7 @@ export const StatsTable: React.FC<StatsTableProps> = ({
                 </th>
                 <th
                   scope="col"
-                  className="px-4 py-3 sm:px-6 cursor-pointer group hover:bg-neutral-900/50 transition-colors text-center w-[35%] sm:w-[18%] relative"
+                  className="px-4 py-2.5 sm:px-5 cursor-pointer group hover:bg-neutral-900/50 transition-colors text-center w-[35%] sm:w-[18%] relative"
                   onClick={() => handleSort("winRate")}
                 >
                   <span>Win Rate</span>
@@ -180,7 +177,7 @@ export const StatsTable: React.FC<StatsTableProps> = ({
                 </th>
                 <th
                   scope="col"
-                  className="px-4 py-3 sm:px-6 cursor-pointer group hover:bg-neutral-900/50 transition-colors text-center hidden sm:table-cell sm:w-[25%] relative"
+                  className="px-4 py-2.5 sm:px-5 cursor-pointer group hover:bg-neutral-900/50 transition-colors text-center hidden sm:table-cell sm:w-[25%] relative"
                   onClick={() => handleSort("kda")}
                 >
                   <span>KDA</span>
@@ -190,7 +187,7 @@ export const StatsTable: React.FC<StatsTableProps> = ({
                 </th>
                 <th
                   scope="col"
-                  className="px-4 py-3 sm:px-6 cursor-pointer group hover:bg-neutral-900/50 transition-colors text-center hidden sm:table-cell sm:w-[15%] relative"
+                  className="px-4 py-2.5 sm:px-5 cursor-pointer group hover:bg-neutral-900/50 transition-colors text-center hidden sm:table-cell sm:w-[15%] relative"
                   onClick={() => handleSort("cs")}
                 >
                   <span>CS/min</span>
@@ -200,13 +197,13 @@ export const StatsTable: React.FC<StatsTableProps> = ({
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-800/50">
+            <tbody className="divide-y divide-neutral-800/45 tabular-nums">
               {sortedData.map((row) => {
                 const wr = row.played > 0 ? (row.wins / row.played) * 100 : 0;
                 let wrColor = "text-neutral-300";
                 if (wr >= 70) wrColor = "text-yellow-500";
-                else if (wr >= 60) wrColor = "text-blue-500";
-                else if (wr >= 50) wrColor = "text-green-500";
+                else if (wr >= 60) wrColor = "text-blue-400";
+                else if (wr >= 50) wrColor = "text-emerald-400";
 
                 const avgKills = row.played > 0 ? row.kills / row.played : 0;
                 const avgDeaths = row.played > 0 ? row.deaths / row.played : 0;
@@ -214,10 +211,10 @@ export const StatsTable: React.FC<StatsTableProps> = ({
                 const kdaRatioValue = avgDeaths > 0 ? (avgKills + avgAssists) / avgDeaths : 999;
                 const kdaRatio = avgDeaths > 0 ? kdaRatioValue.toFixed(2) : "Perfect";
 
-                let kdaColor = "text-neutral-300";
+                let kdaColor = "text-neutral-400";
                 if (kdaRatioValue >= 5) kdaColor = "text-yellow-500";
-                else if (kdaRatioValue >= 4) kdaColor = "text-blue-500";
-                else if (kdaRatioValue >= 3) kdaColor = "text-green-500";
+                else if (kdaRatioValue >= 4) kdaColor = "text-blue-400";
+                else if (kdaRatioValue >= 3) kdaColor = "text-emerald-400";
 
                 const csPerMin = row.gameDuration > 0 ? row.cs / (row.gameDuration / 60) : 0;
 
@@ -233,39 +230,39 @@ export const StatsTable: React.FC<StatsTableProps> = ({
                       onRowClick ? "cursor-pointer" : ""
                     }`}
                   >
-                    <td className="px-4 py-3 sm:px-6 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden shrink-0">
+                    <td className="px-4 py-2.5 sm:px-5 flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-neutral-800 border border-neutral-700/80 overflow-hidden shrink-0">
                         {iconSrc && (
                           <Image
                             src={iconSrc}
                             alt={displayChampName}
-                            width={32}
-                            height={32}
+                            width={28}
+                            height={28}
                             className="w-full h-full object-cover"
                           />
                         )}
                       </div>
-                      <span className="font-bold text-white truncate max-w-[100px] sm:max-w-none">
+                      <span className="font-semibold text-neutral-100 truncate max-w-[100px] sm:max-w-none">
                         {displayChampName}
                       </span>
                     </td>
-                    <td className="px-4 py-3 sm:px-6 text-center font-medium text-neutral-300">
+                    <td className="px-4 py-2.5 sm:px-5 text-center font-medium text-neutral-300">
                       {row.played}
                     </td>
-                    <td className="px-4 py-3 sm:px-6 text-center">
-                      <span className={`font-bold ${wrColor}`}>{wr.toFixed(1)}%</span>
+                    <td className="px-4 py-2.5 sm:px-5 text-center">
+                      <span className={`font-semibold ${wrColor}`}>{wr.toFixed(1)}%</span>
                     </td>
-                    <td className="px-4 py-3 sm:px-6 text-center hidden sm:table-cell">
+                    <td className="px-4 py-2.5 sm:px-5 text-center hidden sm:table-cell">
                       <div className="flex flex-col items-center">
                         <span className="text-neutral-300 text-xs font-medium">
                           {avgKills.toFixed(1)} /{" "}
                           <span className="text-red-400">{avgDeaths.toFixed(1)}</span> /{" "}
                           {avgAssists.toFixed(1)}
                         </span>
-                        <span className={`text-[10px] font-bold ${kdaColor}`}>{kdaRatio} KDA</span>
+                        <span className={`text-[10px] font-medium ${kdaColor}`}>{kdaRatio} KDA</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 sm:px-6 text-center hidden sm:table-cell font-medium text-neutral-400">
+                    <td className="px-4 py-2.5 sm:px-5 text-center hidden sm:table-cell font-medium text-neutral-400">
                       {csPerMin.toFixed(1)}
                     </td>
                   </tr>

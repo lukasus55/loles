@@ -117,7 +117,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
     >
       <div className={`absolute inset-y-0 left-0 w-[3px] ${accentBarClass}`} />
 
-      <div className="px-3.5 py-2.5 pl-4 sm:px-4 sm:py-3 sm:pl-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 lg:grid lg:grid-cols-[82px_100px_154px_minmax(0,1fr)_118px_22px] lg:gap-4">
+      <div className="px-3.5 py-2.5 pl-4 sm:px-4 sm:py-3 sm:pl-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 lg:grid lg:grid-cols-[88px_108px_162px_minmax(0,1fr)_126px_24px] lg:gap-5">
         {/* Outcome, Duration & Relative Time */}
         <div className="min-w-[74px] text-left">
           <p className={`text-xs font-semibold tracking-wide uppercase ${outcomeColorClass}`}>

@@ -92,22 +92,22 @@ export const EnemyChampionsTable: React.FC<EnemyChampionsTableProps> = ({
 
   if (data.length === 0) {
     return (
-      <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-8 flex flex-col items-center justify-center text-center h-full">
-        <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
-        <p className="text-neutral-500 text-sm">No data available.</p>
+      <div className="bg-neutral-900/35 border border-neutral-800/75 rounded-lg p-6 flex flex-col items-center justify-center text-center h-full">
+        <h3 className="text-base font-semibold text-white mb-1.5">{title}</h3>
+        <p className="text-neutral-500 text-xs">No data available.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl shadow-sm overflow-hidden flex flex-col h-full max-h-[400px]">
-      <div className="p-4 border-b border-neutral-800/50 shrink-0">
-        <h3 className="text-lg font-bold text-white tracking-tight">{title}</h3>
+    <div className="bg-neutral-900/35 border border-neutral-800/75 rounded-lg overflow-hidden flex flex-col h-full max-h-[400px]">
+      <div className="px-4 py-3.5 border-b border-neutral-800/60 shrink-0">
+        <h3 className="text-base font-semibold text-white tracking-tight">{title}</h3>
       </div>
 
       <div className="overflow-y-auto flex-1 custom-scrollbar">
         <table className="w-full text-sm text-left table-fixed">
-          <thead className="text-[10px] text-neutral-400 uppercase bg-neutral-950 sticky top-0 z-10 border-b border-neutral-800/50 shadow-sm">
+          <thead className="text-[11px] text-neutral-400 uppercase bg-neutral-950/95 sticky top-0 z-10 border-b border-neutral-800/60">
             <tr>
               <th
                 scope="col"
@@ -141,7 +141,7 @@ export const EnemyChampionsTable: React.FC<EnemyChampionsTableProps> = ({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-800/50">
+          <tbody className="divide-y divide-neutral-800/45 tabular-nums">
             {sortedData.map((row) => {
               const wr = row.played > 0 ? (row.wins / row.played) * 100 : 0;
               let wrColor = "text-neutral-300";

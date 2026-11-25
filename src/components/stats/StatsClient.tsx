@@ -173,26 +173,19 @@ export const StatsClient: React.FC<StatsClientProps> = ({
       : "Most Faced Opponents";
 
   return (
-    <div className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full animate-in fade-in duration-500 space-y-8">
-      <div className="flex flex-col gap-1.5">
-        <h1 className="text-3xl font-bold text-white tracking-tight">Your Analytics</h1>
-        <p className="text-neutral-400 text-sm">
-          Total tracked matches: <strong className="text-neutral-200">{matches.length}</strong>
-          {filteredMatches.length !== matches.length && (
-            <span className="ml-2 text-neutral-500">
-              • Matching current filters:{" "}
-              <strong className="text-neutral-300">{filteredMatches.length}</strong>
-            </span>
-          )}
-        </p>
-      </div>
-
-      <StatsFilters filters={filters} onChange={setFilters} championsData={champions} />
+    <div className="flex-1 container mx-auto px-4 py-6 sm:py-8 max-w-5xl w-full animate-in fade-in duration-300 space-y-5">
+      <StatsFilters
+        filters={filters}
+        onChange={setFilters}
+        championsData={champions}
+        totalMatches={matches.length}
+        matchingMatches={filteredMatches.length}
+      />
 
       {/* Main Analytics Stage: Exact Matchup Preview + Optional Botlane Partner Breakdown OR Multi-Perspective Table */}
       {isExactMatchup ? (
-        <div className="space-y-6">
-          <div className="max-w-4xl mx-auto space-y-5">
+        <div className="space-y-5">
+          <div className="space-y-4">
             <MatchupHeader
               filters={filters.champions}
               role={filters.role}
@@ -204,14 +197,14 @@ export const StatsClient: React.FC<StatsClientProps> = ({
                 onClick={handleOpenMatchupHub}
                 disabled={!filters.role}
                 variant="primary"
-                size="lg"
-                className="w-full max-w-sm flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+                size="sm"
+                className="h-9 px-6 flex items-center justify-center gap-2 disabled:cursor-not-allowed"
               >
                 <span>Open Matchup Hub</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
               {!filters.role && (
-                <p className="text-xs text-neutral-500 text-center mt-2 font-medium">
+                <p className="text-xs text-neutral-500 text-center mt-1.5">
                   Select a role to open Matchup Hub
                 </p>
               )}
@@ -220,7 +213,7 @@ export const StatsClient: React.FC<StatsClientProps> = ({
 
           {/* Botlane partner breakdown directly under 1v1 Matchup Preview */}
           {activePerspective && (
-            <div className="h-[420px]">
+            <div className="h-[400px]">
               <StatsTable
                 data={tableData}
                 championsData={champions}
@@ -235,7 +228,7 @@ export const StatsClient: React.FC<StatsClientProps> = ({
           )}
         </div>
       ) : (
-        <div className="h-[520px]">
+        <div className="h-[480px]">
           <StatsTable
             data={tableData}
             championsData={champions}
@@ -250,8 +243,8 @@ export const StatsClient: React.FC<StatsClientProps> = ({
       )}
 
       {/* Bottom Summary & Most Faced Opponents */}
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="lg:w-[68%] shrink-0 min-h-[340px]">
+      <div className="flex flex-col lg:flex-row gap-5">
+        <div className="lg:w-[66%] shrink-0 min-h-[320px]">
           <GeneralInfo
             summary={summaryStats}
             tableData={tableData}
@@ -260,7 +253,7 @@ export const StatsClient: React.FC<StatsClientProps> = ({
             onHighlightClick={activePerspective ? handleRowClick : undefined}
           />
         </div>
-        <div className="flex-1 min-h-[340px]">
+        <div className="flex-1 min-h-[320px]">
           <EnemyChampionsTable
             data={enemyTableData}
             championsData={champions}

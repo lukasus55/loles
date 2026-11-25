@@ -18,6 +18,8 @@ interface StatsFiltersProps {
   filters: StatsFilterState;
   onChange: (newFilters: StatsFilterState) => void;
   championsData: ChampionData[];
+  totalMatches: number;
+  matchingMatches: number;
 }
 
 const SEASONS = [
@@ -31,6 +33,8 @@ export const StatsFilters: React.FC<StatsFiltersProps> = ({
   filters,
   onChange,
   championsData,
+  totalMatches,
+  matchingMatches,
 }) => {
   const hasAnyFilter =
     filters.season !== null ||
@@ -78,13 +82,37 @@ export const StatsFilters: React.FC<StatsFiltersProps> = ({
   };
 
   return (
-    <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-5 shadow-sm space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-800/50 pb-5">
-        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-          <h3 className="text-lg font-bold text-white flex items-center tracking-tight">
-            <span className="w-1.5 h-5 bg-red-600 rounded-full mr-3 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span>
-            Filters
-          </h3>
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-neutral-800/70">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-semibold text-white tracking-tight">
+            Your Analytics
+          </h1>
+          <p className="text-xs text-neutral-500 mt-1 tabular-nums">
+            <span className="text-neutral-300 font-medium">{totalMatches}</span> tracked matches
+            {matchingMatches !== totalMatches && (
+              <span>
+                {" "}
+                · <span className="text-neutral-300 font-medium">{matchingMatches}</span> matching
+              </span>
+            )}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          {hasAnyFilter && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              className="h-9 px-2.5 text-xs text-neutral-400 hover:text-white gap-1.5"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset
+            </Button>
+          )}
+
           <Dropdown
             options={SEASONS.map((s) => ({
               value: s.value === null ? "all" : String(s.value),
@@ -94,23 +122,9 @@ export const StatsFilters: React.FC<StatsFiltersProps> = ({
             onChange={(val) =>
               onChange({ ...filters, season: val === "all" ? null : parseInt(val, 10) })
             }
-            className="min-w-[140px]"
+            className="h-9 min-w-[130px] bg-neutral-900/60 border-neutral-800/80 text-xs"
           />
-          {hasAnyFilter && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReset}
-              className="text-neutral-400 hover:text-white gap-1.5"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Reset
-            </Button>
-          )}
-        </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          <span className="text-sm font-medium text-neutral-400">Role:</span>
           <RoleFilter
             selectedRole={filters.role}
             onChange={handleRoleChange}
@@ -119,12 +133,14 @@ export const StatsFilters: React.FC<StatsFiltersProps> = ({
         </div>
       </div>
 
-      <ChampionFilterBlock
-        role={filters.role}
-        champions={championsData}
-        filters={filters.champions}
-        onChange={(cFilters) => onChange({ ...filters, champions: cFilters })}
-      />
+      <div className="pb-4 border-b border-neutral-800/60">
+        <ChampionFilterBlock
+          role={filters.role}
+          champions={championsData}
+          filters={filters.champions}
+          onChange={(cFilters) => onChange({ ...filters, champions: cFilters })}
+        />
+      </div>
     </div>
   );
 };
