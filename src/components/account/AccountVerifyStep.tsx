@@ -12,7 +12,7 @@ interface AccountVerifyStepProps {
   region: string;
   targetIconId: number;
   onBack: () => void;
-  onSuccess: (account: any) => void;
+  onSuccess: (account: unknown) => void;
 }
 
 export const AccountVerifyStep: React.FC<AccountVerifyStepProps> = ({
@@ -21,7 +21,7 @@ export const AccountVerifyStep: React.FC<AccountVerifyStepProps> = ({
   region,
   targetIconId,
   onBack,
-  onSuccess
+  onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
@@ -42,21 +42,29 @@ export const AccountVerifyStep: React.FC<AccountVerifyStepProps> = ({
       const res = await fetch("/api/riot/verify", {
         method: "POST",
         body: JSON.stringify({ action: "VERIFY", gameName, tagLine, region, targetIconId }),
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       });
 
       const data = await res.json();
       if (res.ok) {
-        toast({ type: "success", title: "Account Verified", message: "Your Riot account has been successfully linked!" });
+        toast({
+          type: "success",
+          title: "Account Verified",
+          message: "Your Riot account has been successfully linked!",
+        });
         onSuccess(data.account);
       } else {
         if (data.foundIconId) {
           setFoundIconId(data.foundIconId);
         }
-        toast({ type: "error", title: "Verification Failed", message: data.message || "Verification failed" });
+        toast({
+          type: "error",
+          title: "Verification Failed",
+          message: data.message || "Verification failed",
+        });
         setCooldown(30);
       }
-    } catch (e) {
+    } catch {
       toast({ type: "error", title: "Connection Error", message: "Failed to connect to server" });
       setCooldown(10);
     } finally {
@@ -65,34 +73,51 @@ export const AccountVerifyStep: React.FC<AccountVerifyStepProps> = ({
   };
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-      <div className="p-6 bg-neutral-950 border border-neutral-800 rounded-xl text-center space-y-4">
-        <h3 className="text-lg font-bold text-white">Manual Verification Required</h3>
-        <p className="text-neutral-400 text-sm max-w-md mx-auto leading-relaxed">
-          To prove you own <strong className="text-white">{gameName}#{tagLine}</strong>, please open your League of Legends client and change your summoner icon to the exact icon shown below.
+    <div className="space-y-5 animate-in fade-in duration-200">
+      <div className="p-5 bg-neutral-950/50 border border-neutral-800/75 rounded-lg text-center space-y-4">
+        <h3 className="text-base font-semibold text-white">Manual Verification Required</h3>
+        <p className="text-neutral-400 text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
+          To prove you own <strong className="text-white">{gameName}#{tagLine}</strong>, open your
+          League client and equip the summoner icon shown below.
         </p>
 
         {foundIconId !== null ? (
-          <div className="py-8 flex flex-col sm:flex-row items-center justify-center gap-8">
+          <div className="py-4 flex flex-col sm:flex-row items-center justify-center gap-6">
             <div className="text-center">
-              <p className="text-red-400 font-bold mb-3 text-sm flex items-center justify-center gap-1"><X className="w-4 h-4" /> Found Icon</p>
-              <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-neutral-800 relative mx-auto opacity-75 grayscale hover:grayscale-0 transition-all">
-                <Image src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${foundIconId}.jpg`} alt="Found Icon" fill className="object-cover" />
+              <p className="text-red-400 font-semibold mb-2 text-xs flex items-center justify-center gap-1">
+                <X className="w-3.5 h-3.5" /> Found Icon
+              </p>
+              <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-neutral-800 relative mx-auto opacity-75 grayscale">
+                <Image
+                  src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${foundIconId}.jpg`}
+                  alt="Found Icon"
+                  fill
+                  className="object-cover"
+                />
               </div>
             </div>
 
-            <div className="hidden sm:flex text-neutral-600 font-bold text-xl">vs</div>
+            <span className="hidden sm:inline text-neutral-600 font-semibold text-xs uppercase tracking-wider">
+              vs
+            </span>
 
             <div className="text-center">
-              <p className="text-green-500 font-bold mb-3 text-sm flex items-center justify-center gap-1"><Check className="w-4 h-4" /> Expected Icon</p>
-              <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-red-600/50 shadow-[0_0_20px_rgba(239,68,68,0.3)] relative mx-auto">
-                <Image src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${targetIconId}.jpg`} alt="Target Icon" fill className="object-cover" />
+              <p className="text-emerald-400 font-semibold mb-2 text-xs flex items-center justify-center gap-1">
+                <Check className="w-3.5 h-3.5" /> Expected Icon
+              </p>
+              <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-accent/60 relative mx-auto">
+                <Image
+                  src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${targetIconId}.jpg`}
+                  alt="Target Icon"
+                  fill
+                  className="object-cover"
+                />
               </div>
             </div>
           </div>
         ) : (
-          <div className="py-6 flex justify-center">
-            <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-red-600/50 shadow-[0_0_20px_rgba(239,68,68,0.3)] relative">
+          <div className="py-3 flex justify-center">
+            <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-accent/60 relative">
               <Image
                 src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${targetIconId}.jpg`}
                 alt="Target Icon"
@@ -103,26 +128,37 @@ export const AccountVerifyStep: React.FC<AccountVerifyStepProps> = ({
           </div>
         )}
 
-        <p className="text-neutral-500 text-xs uppercase tracking-widest font-bold">
-          Changes may take up to 5 minutes to sync
+        <p className="text-neutral-500 text-[11px]">
+          Changes may take up to 5 minutes to sync.
         </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-neutral-800">
-        <Button variant="outline" onClick={onBack} disabled={isLoading || cooldown > 0} className="w-full sm:w-auto">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-neutral-800/60">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onBack}
+          disabled={isLoading || cooldown > 0}
+          className="w-full sm:w-auto px-4"
+        >
           Back
         </Button>
         <Button
+          size="sm"
           onClick={handleVerify}
           disabled={isLoading || cooldown > 0}
-          className="w-full sm:w-auto px-8 flex items-center min-w-[200px] justify-center"
+          className="w-full sm:w-auto px-5"
         >
           {isLoading ? (
-            <><Spinner size="sm" className="mr-2" /> Checking...</>
+            <>
+              <Spinner size="sm" className="mr-1.5" /> Checking...
+            </>
           ) : cooldown > 0 ? (
             `Wait ${cooldown}s to retry`
           ) : (
-            <><RefreshCw className="w-4 h-4 mr-2" /> I have changed my icon</>
+            <>
+              <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> I have changed my icon
+            </>
           )}
         </Button>
       </div>

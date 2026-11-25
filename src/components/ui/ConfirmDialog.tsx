@@ -30,12 +30,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         onCancel();
       }
     };
-    
+
     if (isOpen) {
       document.addEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "hidden";
     }
-    
+
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "unset";
@@ -45,41 +45,60 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-in fade-in duration-150"
       onClick={onCancel}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
     >
-      <div 
-        className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-200 flex flex-col relative"
+      <div
+        className="bg-[#0d0e12] border border-neutral-800 rounded-xl p-5 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-150 flex flex-col relative overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
-        <button 
+        <button
+          type="button"
           onClick={onCancel}
-          className="absolute top-4 right-4 text-neutral-500 hover:text-white transition-colors p-1"
+          aria-label="Close dialog"
+          className="absolute top-3.5 right-3.5 h-8 w-8 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800/70 flex items-center justify-center transition-colors cursor-pointer"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        <div className="flex items-start gap-4 mb-6">
-          <div className={`p-3 rounded-full shrink-0 ${isDestructive ? 'bg-red-500/10 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'bg-neutral-800 text-white'}`}>
-            <AlertTriangle className="w-6 h-6" />
+        <div className="flex items-start gap-3.5 mb-5 pr-8">
+          <div
+            className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+              isDestructive ? "bg-red-500/10 text-red-400" : "bg-neutral-800 text-neutral-200"
+            }`}
+          >
+            <AlertTriangle className="w-4 h-4" />
           </div>
-          <div className="pt-1">
-            <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-            <p className="text-neutral-400 text-sm leading-relaxed">{description}</p>
+          <div>
+            <h3 className="text-base font-semibold text-white mb-1">{title}</h3>
+            <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">{description}</p>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 mt-2">
-          <Button variant="outline" onClick={onCancel} className="px-5 border-neutral-700 hover:bg-neutral-800 hover:text-white">
+        <div className="flex items-center justify-end gap-2.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onCancel}
+            className="px-4 border-neutral-800 hover:bg-neutral-800 hover:text-white"
+          >
             {cancelText}
           </Button>
-          <Button 
+          <Button
+            type="button"
+            size="sm"
             onClick={() => {
               onConfirm();
               onCancel();
             }}
-            className={`px-5 ${isDestructive ? 'bg-red-600 hover:bg-red-700 text-white' : ''}`}
+            className={`px-4 ${
+              isDestructive ? "bg-red-600 hover:bg-red-700 text-white" : ""
+            }`}
           >
             {confirmText}
           </Button>

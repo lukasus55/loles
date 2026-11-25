@@ -27,36 +27,36 @@ export const Navbar = async () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-neutral-800 bg-black/80 backdrop-blur-md">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b border-neutral-800/80 bg-black/80 backdrop-blur-md">
+      <div className="container mx-auto px-4 max-w-5xl h-14 flex items-center justify-between">
         <div className="flex items-center space-x-1 flex-1">
-          <Image src="/icon.svg" alt="MatchNotes Icon" width={16} height={16} />
-          <Link href="/" className="flex h-full items-center pb-1 text-xl font-bold text-white tracking-tight">
+          <Image src="/icon.svg" alt="LOLES Icon" width={15} height={15} />
+          <Link href="/" className="flex h-full items-center pb-0.5 text-lg font-bold text-white tracking-tight">
             LOLES
           </Link>
         </div>
 
         <nav className="hidden md:flex items-center justify-center space-x-6">
-          <Link href="/matchups" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">
+          <Link href="/matchups" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
             Matchups
           </Link>
-          <Link href="/stats" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">
+          <Link href="/stats" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
             Stats
           </Link>
-          <Link href="/history" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">
+          <Link href="/history" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
             Match History
           </Link>
         </nav>
 
-        <div className="flex items-center justify-end space-x-4 flex-1">
+        <div className="flex items-center justify-end space-x-3 flex-1">
           {session?.user ? (
             <UserNav user={{ ...session.user, image: resolvedImage }} />
           ) : (
             <>
-              <Link href="/login" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors hidden sm:block">
+              <Link href="/login" className="text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors hidden sm:block">
                 Log in
               </Link>
-              <Link href="/signup" className="px-4 py-2 text-sm font-medium bg-accent-dark hover:bg-accent-hover text-white rounded-md transition-colors shadow-sm">
+              <Link href="/signup" className="px-3.5 py-1.5 text-xs sm:text-sm font-medium bg-accent-dark hover:bg-accent-hover text-white rounded-md transition-colors">
                 Sign up
               </Link>
             </>
